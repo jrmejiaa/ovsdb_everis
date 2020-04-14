@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package org.everis.app;
+package org.everis.app.rest;
 
+import org.everis.app.AppWebResource;
 import org.onlab.rest.AbstractWebApplication;
 
 import java.util.Set;

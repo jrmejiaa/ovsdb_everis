@@ -1,17 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <checkstyle version="8.10">
-<file name="/home/jairom/Downloads/org.everis/src/main/java/org/everis/app/AppComponent.java">
+<file name="/home/jairom/Documents/Proyectos/EVERIS/everis_app/org.everis/src/main/java/org/everis/app/AppComponent.java">
 </file>
-<file name="/home/jairom/Downloads/org.everis/src/main/java/org/everis/app/rest/package-info.java">
+<file name="/home/jairom/Documents/Proyectos/EVERIS/everis_app/org.everis/src/main/java/org/everis/app/rest/AppWebApplication.java">
 </file>
-<file name="/home/jairom/Downloads/org.everis/src/main/java/org/everis/app/rest/AppWebApplication.java">
+<file name="/home/jairom/Documents/Proyectos/EVERIS/everis_app/org.everis/src/main/java/org/everis/app/rest/AppWebResource.java">
 </file>
-<file name="/home/jairom/Downloads/org.everis/src/main/java/org/everis/app/rest/AppWebResource.java">
+<file name="/home/jairom/Documents/Proyectos/EVERIS/everis_app/org.everis/src/main/java/org/everis/app/SomeInterface.java">
 </file>
-<file name="/home/jairom/Downloads/org.everis/src/main/java/org/everis/app/SomeInterface.java">
-</file>
-<file name="/home/jairom/Downloads/org.everis/src/main/java/org/everis/app/package-info.java">
-</file>
-<file name="/home/jairom/Downloads/org.everis/target/generated-sources/org/everis/app/ApiDocRegistrator.java">
+<file name="/home/jairom/Documents/Proyectos/EVERIS/everis_app/org.everis/target/generated-sources/org/everis/app/ApiDocRegistrator.java">
 </file>
 </checkstyle>
