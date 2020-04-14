@@ -136,8 +136,11 @@ public class OvsdbBridgeManager implements OvsdbBridgeService {
 
     @Activate
     protected void activate() {
+        log.info("Stocks in appId");
         appId = coreService.getAppId("org.onosproject.ovsdbrest");
+        log.info("Stocks in configService.addListener(configListener)");
         configService.addListener(configListener);
+        log.info("Stocks in configRegistry.registerConfigFactory(configFactory);");
         configRegistry.registerConfigFactory(configFactory);
         log.info("Started");
     }

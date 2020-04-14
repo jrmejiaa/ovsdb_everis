@@ -22,7 +22,9 @@ package org.onosproject.ovsdbrest;
 public class OvsdbRestException {
 
     /**
-     * Thrown for problems related to a device entity representing an ovsdb node.
+     *
+     * @throws java.lang.Exception Thrown for problems related to a device entity representing an ovsdb node.
+     *
      */
     public static class OvsdbDeviceException extends Exception {
         public OvsdbDeviceException(String message) {
@@ -31,12 +33,16 @@ public class OvsdbRestException {
     }
 
     /**
-     * Thrown when the an ovs bridge already exists with a given name.
+     *
+     * @throws java.lang.Exception Thrown when the an ovs bridge already exists with a given name.
+     *
      */
     public static class BridgeAlreadyExistsException extends Exception { }
 
     /**
-     * Thrown when an ovs bridge is not found.
+     *
+     * @throws java.lang.Exception Thrown when an ovs bridge is not found.
+     *
      */
     public static class BridgeNotFoundException extends Exception { }
 }

@@ -27,6 +27,8 @@ public interface OvsdbBridgeService {
      * Creates a new bridge.
      * @param ovsdbAddress the ovsdb IP address
      * @param bridgeName the bridge identifier
+     * @throws OvsdbRestException.OvsdbDeviceException Error Description
+     * @throws OvsdbRestException.BridgeAlreadyExistsException Error Description
      */
     void createBridge(IpAddress ovsdbAddress, String bridgeName) throws OvsdbRestException.OvsdbDeviceException,
             OvsdbRestException.BridgeAlreadyExistsException;
@@ -35,6 +37,8 @@ public interface OvsdbBridgeService {
      * Deletes a bridge.
      * @param ovsdbAddress the ovsdb IP address
      * @param bridgeName the bridge identifier
+     * @throws OvsdbRestException.OvsdbDeviceException Error Description
+     * @throws OvsdbRestException.BridgeNotFoundException Error Description
      */
     void deleteBridge(IpAddress ovsdbAddress, String bridgeName) throws OvsdbRestException.OvsdbDeviceException,
             OvsdbRestException.BridgeNotFoundException;
@@ -44,6 +48,8 @@ public interface OvsdbBridgeService {
      * @param ovsdbAddress the ovsdb IP address
      * @param bridgeName the bridge identifier
      * @param portName the name of the port to attach to the bridge
+     * @throws OvsdbRestException.OvsdbDeviceException Error Description
+     * @throws OvsdbRestException.BridgeNotFoundException Error Description
      */
     void addPort(IpAddress ovsdbAddress, String bridgeName, String portName)
             throws OvsdbRestException.OvsdbDeviceException, OvsdbRestException.BridgeNotFoundException;
@@ -53,6 +59,8 @@ public interface OvsdbBridgeService {
      * @param ovsdbAddress the ovsdb IP address
      * @param bridgeName the bridge identifier
      * @param portName the name of the port to remove from the bridge
+     * @throws OvsdbRestException.OvsdbDeviceException Error Description
+     * @throws OvsdbRestException.BridgeNotFoundException Error Description
      */
     void removePort(IpAddress ovsdbAddress, String bridgeName, String portName)
             throws OvsdbRestException.OvsdbDeviceException, OvsdbRestException.BridgeNotFoundException;
@@ -63,6 +71,7 @@ public interface OvsdbBridgeService {
      * @param bridgeName the bridge identifier
      * @param portName the port name
      * @param patchPeer the name of the peer port
+     * @throws OvsdbRestException.OvsdbDeviceException Error Description
      */
     void createPatchPeerPort(IpAddress ovsdbAddress, String bridgeName, String portName, String patchPeer)
             throws OvsdbRestException.OvsdbDeviceException;
@@ -75,6 +84,8 @@ public interface OvsdbBridgeService {
      * @param localIp local end point of the GRE tunnel
      * @param remoteIp remote end point of GRE tunnel
      * @param key the tunnel key, should represent a 32 bit hexadecimal number
+     * @throws OvsdbRestException.OvsdbDeviceException Error Description
+     * @throws OvsdbRestException.BridgeNotFoundException Error Description
      */
     void createGreTunnel(IpAddress ovsdbAddress, String bridgeName, String portName, IpAddress localIp,
                          IpAddress remoteIp, String key)
@@ -85,6 +96,7 @@ public interface OvsdbBridgeService {
      * @param ovsdbAddress the ovsdb IP address
      * @param bridgeName the bridge identifier
      * @param portName the name of the GRE
+     * @throws OvsdbRestException.OvsdbDeviceException Error Description
      */
     void deleteGreTunnel(IpAddress ovsdbAddress, String bridgeName, String portName)
             throws OvsdbRestException.OvsdbDeviceException;

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2014-present Open Networking Laboratory
+  ~ Copyright 2014-present Open Networking Foundation
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 <!DOCTYPE suppressions PUBLIC "-//Puppy Crawl//DTD Suppressions 1.1//EN" "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
 
 <suppressions>
-
     <suppress files="org.apache.karaf.branding.*" checks="[a-zA-Z0-9]*"/>
 
     <suppress files=".*" checks="FinalParametersCheck"/>
@@ -31,16 +30,37 @@
     <suppress files="org.onlab.packet.*" checks="AbbreviationAsWordInName" />
     <suppress files="org.onlab.jdvue.*" checks="AbbreviationAsWordInName" />
     <suppress files="org.onosproject.driver.pipeline.*" checks="AbbreviationAsWordInName" />
+    <suppress files="org.onosproject.driver.pipeline.ofdpa.Ofdpa2GroupHandler.java" checks="FileLength" />
     <suppress files="org.onosproject.segmentrouting.*" checks="AbbreviationAsWordInName" />
+    <suppress files="org.onosproject.segmentrouting.DefaultRoutingHandler.java" checks="FileLength" />
+
+    <!-- These files carry AT&T copyrights -->
+    <suppress files="org.onlab.packet.EAP" checks="RegexpHeader" />
+    <suppress files="org.onlab.packet.EAPOL" checks="RegexpHeader" />
+    <suppress files="org.onlab.packet.RADIUS" checks="RegexpHeader" />
+    <suppress files="org.onlab.packet.RADIUSAttribute" checks="RegexpHeader" />
 
     <!-- Suppressions for unit testing code -->
-    <suppress checks="JavadocPackage"
+    <suppress checks="Javadoc(Package|Method)"
               files=".*/src/test/.*.java"
             />
 
-    <suppress checks="JavadocPackage"
+    <suppress checks="Javadoc.*"
               files=".*/thirdparty/.*.java"/>
 
+    <suppress checks="Javadoc.*"
+              files=".*/kafkaintegration/.*.java"/>
+
+    <suppress checks="Javadoc.*"
+              files=".*/demo/.*.java"/>
+
+    <suppress checks="FileLength"
+              files=".*/SegmentRoutingManager.java"/>
+    <suppress checks="FileLength"
+              files=".*/Ofdpa2GroupHandler.java"/>
+
     <!-- Suppressions for yangutils generated code -->
-    <suppress files="org.onosproject.yang.gen.v1.*" checks="JavadocStyle" />
+    <suppress files="org.onosproject.yang.gen.v1.*" checks="Javadoc.*" />
+
+    <suppress files="ApiDocRegistrator.java" checks="JavadocPackage" />
 </suppressions>
