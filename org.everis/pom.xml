@@ -27,7 +27,7 @@
 
     <groupId>org.everis</groupId>
     <artifactId>org.everis</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
     <packaging>bundle</packaging>
 
     <description>ONOS REST API bundle archetype</description>
@@ -37,7 +37,7 @@
         <onos.app.name>org.everis.app</onos.app.name>
         <web.context>/onos/org.everis</web.context>
         <api.version>1.0.0</api.version>
-        <api.title>app REST API </api.title>
+        <api.title>EVERIS rest API </api.title>
         <api.description>
             Sample application REST API
         </api.description>

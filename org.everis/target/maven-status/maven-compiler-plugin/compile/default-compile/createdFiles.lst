@@ -1,5 +1,7 @@
-org/everis/app/AppWebResource.class
+org/everis/app/OvsdbNodeConfig$OvsdbNode.class
 org/everis/app/AppComponent.class
+org/everis/app/rest/AppWebResource.class
 org/everis/app/rest/AppWebApplication.class
 org/everis/app/SomeInterface.class
+org/everis/app/OvsdbNodeConfig.class
 org/everis/app/ApiDocRegistrator.class

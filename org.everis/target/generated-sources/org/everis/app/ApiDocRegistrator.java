@@ -34,7 +34,7 @@ public class ApiDocRegistrator {
     protected ApiDocService service;
 
     public ApiDocRegistrator() {
-        provider = new ApiDocProvider("/onos/org.everis", "app REST API",
+        provider = new ApiDocProvider("/onos/org.everis", "EVERIS rest API",
                                       getClass().getClassLoader());
     }
 
