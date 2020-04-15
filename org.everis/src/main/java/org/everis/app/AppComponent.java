@@ -15,21 +15,48 @@
  */
 package org.everis.app;
 
-import org.onlab.packet.IpAddress;
-import org.onosproject.cfg.ComponentConfigService;
-import org.osgi.service.component.ComponentContext;
+import com.google.common.collect.Maps;
+// import com.google.common.collect.Sets;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.onlab.packet.IpAddress;
+import org.onosproject.cfg.ComponentConfigService;
+import org.onosproject.cluster.ClusterService;
+import org.onosproject.core.ApplicationId;
+import org.onosproject.core.CoreService;
+// import org.onlab.util.ItemNotFoundException;
+// import org.onosproject.net.Device;
+import org.onosproject.net.DeviceId;
+//import org.onosproject.net.behaviour.BridgeConfig;
+//import org.onosproject.net.behaviour.BridgeDescription;
+//import org.onosproject.net.behaviour.ControllerInfo;
+//import org.onosproject.net.behaviour.DefaultBridgeDescription;
+import org.onosproject.net.config.NetworkConfigRegistry;
+import org.onosproject.net.config.NetworkConfigService;
+import org.onosproject.net.device.DeviceAdminService;
+import org.onosproject.net.device.DeviceService;
+import org.onosproject.net.driver.DriverService;
+import org.onosproject.ovsdb.controller.OvsdbController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Dictionary;
-import java.util.Properties;
+// import java.util.ArrayList;
+// import java.util.HashSet;
+// import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Set;
+// import java.util.concurrent.ExecutorService;
+// import java.util.Optional;
+// import java.util.NoSuchElementException;
+import java.util.concurrent.atomic.AtomicLong;
 
+import org.everis.app.OvsdbNodeConfig.OvsdbNode;
 import org.everis.app.OvsdbRestException.BridgeNotFoundException;
 import org.everis.app.OvsdbRestException.BridgeAlreadyExistsException;
 import org.everis.app.OvsdbRestException.OvsdbDeviceException;
@@ -54,6 +81,32 @@ public class AppComponent implements OvsdbBridgeService {
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
     protected ComponentConfigService cfgService;
 
+    @Reference(cardinality = ReferenceCardinality.MANDATORY)
+    protected CoreService coreService;
+
+    @Reference(cardinality = ReferenceCardinality.MANDATORY)
+    protected DeviceService deviceService;
+
+    @Reference(cardinality = ReferenceCardinality.MANDATORY)
+    protected ClusterService clusterService;
+
+    @Reference(cardinality = ReferenceCardinality.MANDATORY)
+    protected NetworkConfigRegistry configRegistry;
+
+    @Reference(cardinality = ReferenceCardinality.MANDATORY)
+    protected NetworkConfigService configService;
+
+    @Reference(cardinality = ReferenceCardinality.MANDATORY)
+    protected OvsdbController controller;
+
+    @Reference(cardinality = ReferenceCardinality.MANDATORY)
+    protected DeviceAdminService adminService;
+
+    @Reference(cardinality = ReferenceCardinality.MANDATORY)
+    protected DriverService driverService;
+
+    private Set<OvsdbNode> ovsdbNodes;
+
     @Activate
     protected void activate() {
         cfgService.registerProperties(getClass());
@@ -68,15 +121,69 @@ public class AppComponent implements OvsdbBridgeService {
 
     @Modified
     public void modified(ComponentContext context) {
-        Dictionary<?, ?> properties = context != null ? context.getProperties() : new Properties();
         log.info("Reconfigured");
     }
 
+    private ApplicationId appId;
+    private static final int DPID_BEGIN = 4;
+    private static final int OFPORT = 6640;
+    private final AtomicLong datapathId = new AtomicLong(DPID_BEGIN);
+
+    // {bridgeName: datapathId} structure to manage the creation/deletion of bridges
+    private Map<String, DeviceId> bridgeIds = Maps.newConcurrentMap();
 
     @Override
     public void createBridge(IpAddress ovsdbAddress, String bridgeName)
             throws OvsdbDeviceException, BridgeAlreadyExistsException {
-        log.info("This is your IP {} and the new of the bridge {}", ovsdbAddress, bridgeName);
+        OvsdbNode ovsdbNode;
+        log.info("Creating bridge {} at {}", bridgeName, ovsdbAddress);
+        try {
+            //  gets the target ovsdb node
+            ovsdbNode = ovsdbNodes.stream().filter(node -> node.ovsdbIp().equals(ovsdbAddress)).findFirst().get();
+        } catch (NoSuchElementException nsee) {
+            log.info(nsee.getMessage());
+            throw new OvsdbDeviceException(nsee.getMessage());
+        }
+//
+//        // construct a unique dev id'
+//        DeviceId dpid = getNextUniqueDatapathId(datapathId);
+//
+//        if (isBridgeCreated(bridgeName)) {
+//            log.warn("A bridge with this name already exists, aborting.");
+//            throw new BridgeAlreadyExistsException();
+//        }
+//        List<ControllerInfo> controllers = new ArrayList<>();
+//        Sets.newHashSet(clusterService.getNodes()).forEach(controller -> {
+//            ControllerInfo ctrlInfo = new ControllerInfo(controller.ip(), OFPORT, "tcp");
+//            controllers.add(ctrlInfo);
+//            log.info("controller {}:{} added", ctrlInfo.ip().toString(), ctrlInfo.port());
+//        });
+//        try {
+//            Device device = deviceService.getDevice(ovsdbNode.ovsdbId());
+//            if (device == null) {
+//                log.warn("Ovsdb device not found, aborting.");
+//                throw new OvsdbDeviceException("Ovsdb device not found");
+//            }
+//            if (device.is(BridgeConfig.class)) {
+//                BridgeConfig bridgeConfig = device.as(BridgeConfig.class);
+//                BridgeDescription bridgeDescription = DefaultBridgeDescription.builder()
+//                        .name(bridgeName)
+//                        .datapathId(dpid.toString())
+//                        .controllers(controllers)
+//                        .build();
+//                bridgeConfig.addBridge(bridgeDescription);
+//                bridgeIds.put(bridgeName, bridgeDescription.deviceId().get());
+//                log.info("Correctly created bridge {} at {}", bridgeName, ovsdbAddress);
+//            } else {
+//                log.warn("The bridging behaviour is not supported in device {}", device.id());
+//                throw new OvsdbDeviceException(
+//                        "The bridging behaviour is not supported in device " + device.id()
+//                );
+//            }
+//        } catch (ItemNotFoundException e) {
+//            log.warn("Failed to create integration bridge on {}", ovsdbNode.ovsdbIp());
+//            throw new OvsdbDeviceException("Error with ovsdb device: item not found");
+//        }
     }
 
     @Override
@@ -116,4 +223,34 @@ public class AppComponent implements OvsdbBridgeService {
             throws OvsdbDeviceException {
 
     }
+
+    /**
+     * Checks if the bridge exists and is available.
+     *
+     * @return true if the bridge is available, false otherwise
+     */
+    private boolean isBridgeCreated(String bridgeName) {
+        DeviceId deviceId = bridgeIds.get(bridgeName);
+        return (deviceId != null
+                && deviceService.getDevice(deviceId) != null
+                && deviceService.isAvailable(deviceId));
+    }
+
+
+    /**
+     * Gets an available datapath id for the new bridge.
+     *
+     * @param datapathId the integer used to generate ids
+     * @return the datapath id
+     */
+    private DeviceId getNextUniqueDatapathId(AtomicLong datapathId) {
+        DeviceId dpid;
+        do {
+            String stringId = String.format("%16X", datapathId.getAndIncrement()).replace(' ', '0');
+            log.info("String id is: " + stringId);
+            dpid = DeviceId.deviceId(stringId);
+        } while (deviceService.getDevice(dpid) != null);
+        return dpid;
+    }
+
 }

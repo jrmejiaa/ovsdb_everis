@@ -38,6 +38,10 @@
         <web.context>/onos/org.everis</web.context>
         <api.version>1.0.0</api.version>
         <api.title>EVERIS rest API </api.title>
+        <onos.app.requires>
+            org.onosproject.ovsdb-base,
+            org.onosproject.drivers.ovsdb
+        </onos.app.requires>
         <api.description>
             Sample application REST API
         </api.description>
@@ -123,6 +127,13 @@
             <artifactId>org.apache.karaf.shell.console</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.onosproject</groupId>
+            <artifactId>onos-protocols-ovsdb-api</artifactId>
+            <version>${onos.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
