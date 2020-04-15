@@ -5,4 +5,6 @@
 /home/jairom/Documents/Proyectos/EVERIS/everis_app/org.everis/src/main/java/org/everis/app/AppComponent.java
 /home/jairom/Documents/Proyectos/EVERIS/everis_app/org.everis/src/main/java/org/everis/app/package-info.java
 /home/jairom/Documents/Proyectos/EVERIS/everis_app/org.everis/target/generated-sources/org/everis/app/ApiDocRegistrator.java
+/home/jairom/Documents/Proyectos/EVERIS/everis_app/org.everis/src/main/java/org/everis/app/OvsdbBridgeService.java
+/home/jairom/Documents/Proyectos/EVERIS/everis_app/org.everis/src/main/java/org/everis/app/OvsdbRestException.java
 /home/jairom/Documents/Proyectos/EVERIS/everis_app/org.everis/src/main/java/org/everis/app/rest/AppWebResource.java

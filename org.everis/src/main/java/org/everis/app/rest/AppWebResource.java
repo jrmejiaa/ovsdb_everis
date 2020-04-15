@@ -16,6 +16,7 @@
 package org.everis.app.rest;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.everis.app.SomeInterface;
 import org.onlab.packet.IpAddress;
 import org.onosproject.rest.AbstractWebResource;
 import org.slf4j.Logger;
@@ -63,7 +64,9 @@ public class AppWebResource extends AbstractWebResource {
                               @PathParam("bridge-name") String bridgeName) {
         try {
             IpAddress ovsdbAddress = IpAddress.valueOf(ovsdbIp);
-            log.info("It is inside of the POST REST API");
+            log.info("Start Communication with SomeInterface function");
+            SomeInterface someInterface = get(SomeInterface.class);
+            someInterface.someMethod();
             ObjectNode node = mapper().createObjectNode().put("OVSDB IP", ovsdbAddress.toString());
             return ok(node).build();
         } catch (Exception ex) {

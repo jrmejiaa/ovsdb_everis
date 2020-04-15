@@ -72,6 +72,7 @@ public class AppComponent implements SomeInterface {
 
     @Override
     public void someMethod() {
+        log.info("You are inside of the function someMethod");
         log.info("Invoked");
     }
 
