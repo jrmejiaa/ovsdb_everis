@@ -15,6 +15,7 @@
  */
 package org.everis.app;
 
+import org.onlab.packet.IpAddress;
 import org.onosproject.cfg.ComponentConfigService;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
@@ -29,17 +30,21 @@ import org.slf4j.LoggerFactory;
 import java.util.Dictionary;
 import java.util.Properties;
 
-import static org.onlab.util.Tools.get;
+import org.everis.app.OvsdbRestException.BridgeNotFoundException;
+import org.everis.app.OvsdbRestException.BridgeAlreadyExistsException;
+import org.everis.app.OvsdbRestException.OvsdbDeviceException;
+
+//import static org.onlab.util.Tools.get;
 
 /**
  * Skeletal ONOS application component.
  */
 @Component(immediate = true,
-           service = {SomeInterface.class},
+           service = {OvsdbBridgeService.class},
            property = {
                "someProperty=Some Default String Value",
            })
-public class AppComponent implements SomeInterface {
+public class AppComponent implements OvsdbBridgeService {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -64,16 +69,51 @@ public class AppComponent implements SomeInterface {
     @Modified
     public void modified(ComponentContext context) {
         Dictionary<?, ?> properties = context != null ? context.getProperties() : new Properties();
-        if (context != null) {
-            someProperty = get(properties, "someProperty");
-        }
         log.info("Reconfigured");
     }
 
+
     @Override
-    public void someMethod() {
-        log.info("You are inside of the function someMethod");
-        log.info("Invoked");
+    public void createBridge(IpAddress ovsdbAddress, String bridgeName)
+            throws OvsdbDeviceException, BridgeAlreadyExistsException {
+        log.info("This is your IP {} and the new of the bridge {}", ovsdbAddress, bridgeName);
     }
 
+    @Override
+    public void deleteBridge(IpAddress ovsdbAddress, String bridgeName)
+            throws OvsdbDeviceException, BridgeNotFoundException {
+
+    }
+
+    @Override
+    public void addPort(IpAddress ovsdbAddress, String bridgeName, String portName)
+            throws OvsdbDeviceException, BridgeNotFoundException {
+
+    }
+
+    @Override
+    public void removePort(IpAddress ovsdbAddress, String bridgeName, String portName)
+            throws OvsdbDeviceException, BridgeNotFoundException {
+
+    }
+
+    @Override
+    public void createPatchPeerPort(IpAddress ovsdbAddress, String bridgeName,
+                                    String portName, String patchPeer)
+            throws OvsdbDeviceException {
+
+    }
+
+    @Override
+    public void createGreTunnel(IpAddress ovsdbAddress, String bridgeName, String portName,
+                                IpAddress localIp, IpAddress remoteIp, String key)
+            throws OvsdbDeviceException, BridgeNotFoundException {
+
+    }
+
+    @Override
+    public void deleteGreTunnel(IpAddress ovsdbAddress, String bridgeName, String portName)
+            throws OvsdbDeviceException {
+
+    }
 }
