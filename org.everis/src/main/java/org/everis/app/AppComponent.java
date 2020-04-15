@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
 // import java.util.HashSet;
 // import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
+// import java.util.NoSuchElementException;
 import java.util.Set;
 // import java.util.concurrent.ExecutorService;
 // import java.util.Optional;
@@ -67,16 +67,10 @@ import org.everis.app.OvsdbRestException.OvsdbDeviceException;
  * Skeletal ONOS application component.
  */
 @Component(immediate = true,
-           service = {OvsdbBridgeService.class},
-           property = {
-               "someProperty=Some Default String Value",
-           })
+           service = {OvsdbBridgeService.class})
 public class AppComponent implements OvsdbBridgeService {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
-
-    /** Some configurable property. */
-    private String someProperty;
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
     protected ComponentConfigService cfgService;
@@ -140,9 +134,9 @@ public class AppComponent implements OvsdbBridgeService {
         try {
             //  gets the target ovsdb node
             ovsdbNode = ovsdbNodes.stream().filter(node -> node.ovsdbIp().equals(ovsdbAddress)).findFirst().get();
-        } catch (NoSuchElementException nsee) {
-            log.info(nsee.getMessage());
-            throw new OvsdbDeviceException(nsee.getMessage());
+        } catch (Exception e) {
+            log.info(e.getMessage());
+            throw new OvsdbDeviceException(e.getMessage());
         }
 //
 //        // construct a unique dev id'
