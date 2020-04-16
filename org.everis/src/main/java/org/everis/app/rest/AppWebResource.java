@@ -175,4 +175,35 @@ public class AppWebResource extends AbstractWebResource {
         }
     }
 
+    /**
+     * Creates Patch Peer Port to connect with another port.
+     * @param ovsdbIp OVSDB IP Address
+     * @param bridgeName Name of the Bridge
+     * @param portName Port Name
+     * @param patchPeer PatchPeer
+     * @return 200 OK If everything goes fine
+     */
+    @POST
+    @Path("/{ovsdb-ip}/bridge/{bridge-name}/port/{port-name}/patch_peer/{patch-peer}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response createPatchPeerPort(@PathParam("ovsdb-ip") String ovsdbIp,
+                                        @PathParam("bridge-name") String bridgeName,
+                                        @PathParam("port-name") String portName,
+                                        @PathParam("patch-peer") String patchPeer) {
+        try {
+            log.info("Checking the address...");
+            IpAddress ovsdbAddress = IpAddress.valueOf(ovsdbIp);
+            log.info("Start the process in the createPatchPeerPort function...");
+            OvsdbBridgeService ovsdbBridgeService = get(OvsdbBridgeService.class);
+            ovsdbBridgeService.createPatchPeerPort(ovsdbAddress, bridgeName, portName, patchPeer);
+
+            ObjectNode node = mapper().createObjectNode().put("patch-peer-created:", "true");
+            // Return 200 OK
+            return ok(node).build();
+        } catch (OvsdbRestException.OvsdbDeviceException ex) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ex.getMessage()).build();
+        }
+    }
+
 }

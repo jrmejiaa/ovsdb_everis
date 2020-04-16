@@ -25,6 +25,9 @@ import org.onosproject.net.behaviour.BridgeConfig;
 import org.onosproject.net.behaviour.BridgeDescription;
 import org.onosproject.net.behaviour.DefaultBridgeDescription;
 import org.onosproject.net.behaviour.ControllerInfo;
+import org.onosproject.net.behaviour.DefaultPatchDescription;
+import org.onosproject.net.behaviour.PatchDescription;
+import org.onosproject.net.behaviour.InterfaceConfig;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -284,6 +287,36 @@ public class AppComponent implements OvsdbBridgeService {
                                     String portName, String patchPeer)
             throws OvsdbDeviceException {
 
+        log.info("Setting port {} as peer of port {}", portName, patchPeer);
+
+        OvsdbNode ovsdbNode = new OvsdbNode(ovsdbAddress, OVSPORT);
+
+        Device device = deviceService.getDevice(ovsdbNode.ovsdbId());
+        log.info("OvsdbNode.ovsdbId = " + ovsdbNode.ovsdbId());
+        if (device == null) {
+            log.warn("Ovsdb device not found, aborting.");
+            throw new OvsdbDeviceException("Ovsdb device not found");
+        }
+
+        if (device.is(InterfaceConfig.class)) {
+            InterfaceConfig interfaceConfig = device.as(InterfaceConfig.class);
+
+            // prepare patch
+            PatchDescription.Builder builder = DefaultPatchDescription.builder();
+            PatchDescription patchDescription = builder
+                    .deviceId(bridgeName)
+                    .ifaceName(portName)
+                    .peer(patchPeer)
+                    .build();
+            // add patch to port through ovsdb
+            interfaceConfig.addPatchMode(portName, patchDescription);
+            log.info("Correctly created port {} on device {} as peer of port {}", portName, bridgeName, patchPeer);
+        } else {
+            log.warn("The interface behaviour is not supported in device {}", device.id());
+            throw new OvsdbDeviceException(
+                    "The interface behaviour is not supported in device " + device.id()
+            );
+        }
     }
 
     @Override
