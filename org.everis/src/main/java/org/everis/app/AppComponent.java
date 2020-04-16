@@ -16,7 +16,14 @@
 package org.everis.app;
 
 import com.google.common.collect.Maps;
-// import com.google.common.collect.Sets;
+import com.google.common.collect.Sets;
+import org.onlab.packet.TpPort;
+import org.onlab.util.ItemNotFoundException;
+import org.onosproject.net.Device;
+import org.onosproject.net.behaviour.BridgeConfig;
+import org.onosproject.net.behaviour.BridgeDescription;
+import org.onosproject.net.behaviour.ControllerInfo;
+import org.onosproject.net.behaviour.DefaultBridgeDescription;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -29,13 +36,7 @@ import org.onosproject.cfg.ComponentConfigService;
 import org.onosproject.cluster.ClusterService;
 import org.onosproject.core.ApplicationId;
 import org.onosproject.core.CoreService;
-// import org.onlab.util.ItemNotFoundException;
-// import org.onosproject.net.Device;
 import org.onosproject.net.DeviceId;
-//import org.onosproject.net.behaviour.BridgeConfig;
-//import org.onosproject.net.behaviour.BridgeDescription;
-//import org.onosproject.net.behaviour.ControllerInfo;
-//import org.onosproject.net.behaviour.DefaultBridgeDescription;
 import org.onosproject.net.config.NetworkConfigRegistry;
 import org.onosproject.net.config.NetworkConfigService;
 import org.onosproject.net.device.DeviceAdminService;
@@ -45,15 +46,13 @@ import org.onosproject.ovsdb.controller.OvsdbController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// import java.util.ArrayList;
+import java.util.ArrayList;
 // import java.util.HashSet;
-// import java.util.List;
+import java.util.List;
 import java.util.Map;
-// import java.util.NoSuchElementException;
 import java.util.Set;
 // import java.util.concurrent.ExecutorService;
 // import java.util.Optional;
-// import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.everis.app.OvsdbNodeConfig.OvsdbNode;
@@ -67,37 +66,43 @@ import org.everis.app.OvsdbRestException.OvsdbDeviceException;
  * Skeletal ONOS application component.
  */
 @Component(immediate = true,
-           service = {OvsdbBridgeService.class})
+           service = {OvsdbBridgeService.class},
+            property = {
+                "someProperty=Some Default String Value",
+            })
 public class AppComponent implements OvsdbBridgeService {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    @Reference(cardinality = ReferenceCardinality.MANDATORY)
-    protected ComponentConfigService cfgService;
+    /** Some configurable property. */
+    private String someProperty;
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
-    protected CoreService coreService;
+    private ComponentConfigService cfgService;
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
-    protected DeviceService deviceService;
+    private CoreService coreService;
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
-    protected ClusterService clusterService;
+    private DeviceService deviceService;
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
-    protected NetworkConfigRegistry configRegistry;
+    private ClusterService clusterService;
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
-    protected NetworkConfigService configService;
+    private NetworkConfigRegistry configRegistry;
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
-    protected OvsdbController controller;
+    private NetworkConfigService configService;
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
-    protected DeviceAdminService adminService;
+    private OvsdbController controller;
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
-    protected DriverService driverService;
+    private DeviceAdminService adminService;
+
+    @Reference(cardinality = ReferenceCardinality.MANDATORY)
+    private DriverService driverService;
 
     private Set<OvsdbNode> ovsdbNodes;
 
@@ -120,7 +125,8 @@ public class AppComponent implements OvsdbBridgeService {
 
     private ApplicationId appId;
     private static final int DPID_BEGIN = 4;
-    private static final int OFPORT = 6640;
+    private static final int OFPORT = 6633;
+    private static final TpPort OVSPORT = TpPort.tpPort(6640);
     private final AtomicLong datapathId = new AtomicLong(DPID_BEGIN);
 
     // {bridgeName: datapathId} structure to manage the creation/deletion of bridges
@@ -129,55 +135,48 @@ public class AppComponent implements OvsdbBridgeService {
     @Override
     public void createBridge(IpAddress ovsdbAddress, String bridgeName)
             throws OvsdbDeviceException, BridgeAlreadyExistsException {
-        OvsdbNode ovsdbNode;
-        log.info("Creating bridge {} at {}", bridgeName, ovsdbAddress);
-        try {
-            //  gets the target ovsdb node
-            ovsdbNode = ovsdbNodes.stream().filter(node -> node.ovsdbIp().equals(ovsdbAddress)).findFirst().get();
-        } catch (Exception e) {
-            log.info(e.getMessage());
-            throw new OvsdbDeviceException(e.getMessage());
+        OvsdbNode ovsdbNode = new OvsdbNode(ovsdbAddress, OVSPORT);
+
+        // construct a unique dev id'
+        DeviceId dpid = getNextUniqueDatapathId(datapathId);
+
+        if (isBridgeCreated(bridgeName)) {
+            log.warn("A bridge with this name already exists, aborting.");
+            throw new BridgeAlreadyExistsException();
         }
-//
-//        // construct a unique dev id'
-//        DeviceId dpid = getNextUniqueDatapathId(datapathId);
-//
-//        if (isBridgeCreated(bridgeName)) {
-//            log.warn("A bridge with this name already exists, aborting.");
-//            throw new BridgeAlreadyExistsException();
-//        }
-//        List<ControllerInfo> controllers = new ArrayList<>();
-//        Sets.newHashSet(clusterService.getNodes()).forEach(controller -> {
-//            ControllerInfo ctrlInfo = new ControllerInfo(controller.ip(), OFPORT, "tcp");
-//            controllers.add(ctrlInfo);
-//            log.info("controller {}:{} added", ctrlInfo.ip().toString(), ctrlInfo.port());
-//        });
-//        try {
-//            Device device = deviceService.getDevice(ovsdbNode.ovsdbId());
-//            if (device == null) {
-//                log.warn("Ovsdb device not found, aborting.");
-//                throw new OvsdbDeviceException("Ovsdb device not found");
-//            }
-//            if (device.is(BridgeConfig.class)) {
-//                BridgeConfig bridgeConfig = device.as(BridgeConfig.class);
-//                BridgeDescription bridgeDescription = DefaultBridgeDescription.builder()
-//                        .name(bridgeName)
-//                        .datapathId(dpid.toString())
-//                        .controllers(controllers)
-//                        .build();
-//                bridgeConfig.addBridge(bridgeDescription);
-//                bridgeIds.put(bridgeName, bridgeDescription.deviceId().get());
-//                log.info("Correctly created bridge {} at {}", bridgeName, ovsdbAddress);
-//            } else {
-//                log.warn("The bridging behaviour is not supported in device {}", device.id());
-//                throw new OvsdbDeviceException(
-//                        "The bridging behaviour is not supported in device " + device.id()
-//                );
-//            }
-//        } catch (ItemNotFoundException e) {
-//            log.warn("Failed to create integration bridge on {}", ovsdbNode.ovsdbIp());
-//            throw new OvsdbDeviceException("Error with ovsdb device: item not found");
-//        }
+
+        List<ControllerInfo> controllers = new ArrayList<>();
+        Sets.newHashSet(clusterService.getNodes()).forEach(controller -> {
+            ControllerInfo ctrlInfo = new ControllerInfo(controller.ip(), OFPORT, "tcp");
+            controllers.add(ctrlInfo);
+            log.info("controller {}:{} added", ctrlInfo.ip().toString(), ctrlInfo.port());
+        });
+        try {
+            Device device = deviceService.getDevice(ovsdbNode.ovsdbId());
+            if (device == null) {
+                log.warn("Ovsdb device not found, aborting.");
+                throw new OvsdbDeviceException("Ovsdb device not found");
+            }
+            if (device.is(BridgeConfig.class)) {
+                BridgeConfig bridgeConfig = device.as(BridgeConfig.class);
+                BridgeDescription bridgeDescription = DefaultBridgeDescription.builder()
+                        .name(bridgeName)
+                        .datapathId(dpid.toString())
+                        .controllers(controllers)
+                        .build();
+                bridgeConfig.addBridge(bridgeDescription);
+                bridgeIds.put(bridgeName, bridgeDescription.deviceId().get());
+                log.info("Correctly created bridge {} at {}", bridgeName, ovsdbAddress);
+            } else {
+                log.warn("The bridging behaviour is not supported in device {}", device.id());
+                throw new OvsdbDeviceException(
+                        "The bridging behaviour is not supported in device " + device.id()
+                );
+            }
+        } catch (ItemNotFoundException e) {
+            log.warn("Failed to create integration bridge on {}", ovsdbNode.ovsdbIp());
+            throw new OvsdbDeviceException("Error with ovsdb device: item not found");
+        }
     }
 
     @Override

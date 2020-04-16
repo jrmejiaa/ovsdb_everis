@@ -17,6 +17,7 @@ package org.everis.app.rest;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.everis.app.OvsdbBridgeService;
+import org.everis.app.OvsdbRestException;
 import org.onlab.packet.IpAddress;
 import org.onosproject.rest.AbstractWebResource;
 import org.slf4j.Logger;
@@ -32,9 +33,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
- * Sample web resource.
+ * Possible REST APIs to make changes in the switches of the ONOS Cluster.
  */
-@Path("test/")
+@Path("config/")
 public class AppWebResource extends AbstractWebResource {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -52,9 +53,11 @@ public class AppWebResource extends AbstractWebResource {
     }
 
     /**
-     * @param ovsdbIp OVSDB IP Address.
-     * @param bridgeName Bridge Name.
-     * @return Return 200 OK if OVSDB IP exitis.
+     * Create a bridge using the IP of a known Device Manager.
+     *
+     * @param ovsdbIp OVSDB IP Address
+     * @param bridgeName Bridge Name
+     * @return Return 200 OK if OVSDB IP exitis
      */
     @POST
     @Path("{ovsdb-ip}/bridge/{bridge-name}/")
@@ -64,13 +67,17 @@ public class AppWebResource extends AbstractWebResource {
                               @PathParam("bridge-name") String bridgeName) {
         try {
             IpAddress ovsdbAddress = IpAddress.valueOf(ovsdbIp);
-            log.info("Start Communication with SomeInterface function");
+            // Go to the createBridge function to create the bridge according to the given information
             OvsdbBridgeService ovsdbBridgeService = get(OvsdbBridgeService.class);
             ovsdbBridgeService.createBridge(ovsdbAddress, bridgeName);
-            ObjectNode node = mapper().createObjectNode().put("OVSDB IP", ovsdbAddress.toString());
+            ObjectNode node = mapper().createObjectNode().put("bridge-created:", "true");
+            // Return 200 OK with a JSON of successful connection
             return ok(node).build();
-        } catch (Exception ex) {
+
+        } catch (OvsdbRestException.BridgeAlreadyExistsException ex) {
             return Response.status(Response.Status.CONFLICT).entity("A bridge with this name already exists").build();
+        } catch (OvsdbRestException.OvsdbDeviceException ex) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ex.getMessage()).build();
         }
     }
 

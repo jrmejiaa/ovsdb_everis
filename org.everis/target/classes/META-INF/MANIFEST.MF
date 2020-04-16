@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1586978734529
+Bnd-LastModified: 1587001702383
 Build-Jdk: 11.0.6
 Built-By: jairom
 Bundle-ClassPath: WEB-INF/classes
@@ -10,24 +10,24 @@ Bundle-Name: org.everis
 Bundle-SymbolicName: org.everis.org.everis
 Bundle-Version: 1.0.0
 Created-By: Apache Maven Bundle Plugin
-Export-Package: org.everis.app;uses:="org.onlab.packet,org.onosproject.c
- fg,org.onosproject.cluster,org.onosproject.core,org.onosproject.net,org
- .onosproject.net.config,org.onosproject.net.device,org.onosproject.net.
- driver,org.onosproject.ovsdb.controller,org.onosproject.rest,org.osgi.s
- ervice.component";version="1.0.0",org.everis.app.rest;uses:="javax.ws.r
- s,javax.ws.rs.core,org.onlab.rest,org.onosproject.rest";version="1.0.0"
+Export-Package: everis;uses:="org.onosproject.rest";version="1.0.0",org.
+ everis.app;uses:="org.onlab.packet,org.onosproject.core,org.onosproject
+ .net,org.onosproject.net.config,org.osgi.service.component";version="1.
+ 0.0",org.everis.app.rest;uses:="javax.ws.rs,javax.ws.rs.core,org.onlab.
+ rest,org.onosproject.rest";version="1.0.0"
 Import-Package: com.fasterxml.jackson.databind;version="[2.10,3)",com.fa
  sterxml.jackson.databind.node;version="[2.10,3)",com.google.common.coll
  ect;version="[22.0,23)",javax.ws.rs;version="[2.1,3)",javax.ws.rs.core;
  version="[2.1,3)",org.everis.app,org.onlab.packet;version="[2.2,3)",org
- .onlab.rest;version="[2.2,3)",org.onosproject.cfg;version="[2.2,3)",org
- .onosproject.cluster;version="[2.2,3)",org.onosproject.core;version="[2
- .2,3)",org.onosproject.net;version="[2.2,3)",org.onosproject.net.config
- ;version="[2.2,3)",org.onosproject.net.device;version="[2.2,3)",org.ono
- sproject.net.driver;version="[2.2,3)",org.onosproject.ovsdb.controller;
- version="[2.2,3)",org.onosproject.rest;version="[2.2,3)",org.osgi.servi
- ce.component;version="[1.4,2)",org.slf4j;version="[1.7,2)",org.glassfis
- h.jersey.servlet;version="[2.27,3)"
+ .onlab.rest;version="[2.2,3)",org.onlab.util;version="[2.2,3)",org.onos
+ project.cfg;version="[2.2,3)",org.onosproject.cluster;version="[2.2,3)"
+ ,org.onosproject.core;version="[2.2,3)",org.onosproject.net;version="[2
+ .2,3)",org.onosproject.net.behaviour;version="[2.2,3)",org.onosproject.
+ net.config;version="[2.2,3)",org.onosproject.net.device;version="[2.2,3
+ )",org.onosproject.net.driver;version="[2.2,3)",org.onosproject.ovsdb.c
+ ontroller;version="[2.2,3)",org.onosproject.rest;version="[2.2,3)",org.
+ osgi.service.component;version="[1.4,2)",org.slf4j;version="[1.7,2)",or
+ g.glassfish.jersey.servlet;version="[2.27,3)"
 Provide-Capability: osgi.service;objectClass:List<String>="org.everis.ap
  p.OvsdbBridgeService"
 Require-Capability: osgi.service;filter:="(objectClass=org.onosproject.c
@@ -46,7 +46,7 @@ Require-Capability: osgi.service;filter:="(objectClass=org.onosproject.c
  ="(objectClass=org.onosproject.rest.ApiDocService)";effective:=active,o
  sgi.extender;filter:="(&(osgi.extender=osgi.component)(version>=1.4.0)(
  !(version>=2.0.0)))",osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=11))"
-Service-Component: OSGI-INF/org.everis.app.ApiDocRegistrator.xml,OSGI-IN
- F/org.everis.app.AppComponent.xml
+Service-Component: OSGI-INF/everis.ApiDocRegistrator.xml,OSGI-INF/org.ev
+ eris.app.AppComponent.xml
 Tool: Bnd-4.1.0.201810181252
 Web-ContextPath: /onos/org.everis

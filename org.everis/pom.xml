@@ -43,9 +43,9 @@
             org.onosproject.drivers.ovsdb
         </onos.app.requires>
         <api.description>
-            Sample application REST API
+            EVERIS API to make control over the switches using OVSDB Protocol
         </api.description>
-        <api.package>org.everis.app</api.package>
+        <api.package>everis</api.package>
     </properties>
 
     <dependencies>

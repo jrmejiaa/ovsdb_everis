@@ -89,28 +89,28 @@ public class OvsdbBridgeManager implements OvsdbBridgeService {
     private static final int OFPORT = 6633;
 
     @Reference (cardinality = ReferenceCardinality.MANDATORY)
-    protected CoreService coreService;
+    private CoreService coreService;
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
-    protected DeviceService deviceService;
+    private DeviceService deviceService;
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
-    protected ClusterService clusterService;
+    private ClusterService clusterService;
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
-    protected NetworkConfigRegistry configRegistry;
+    private NetworkConfigRegistry configRegistry;
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
-    protected NetworkConfigService configService;
+    private NetworkConfigService configService;
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
-    protected OvsdbController controller;
+    private OvsdbController controller;
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
-    protected DeviceAdminService adminService;
+    private DeviceAdminService adminService;
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
-    protected DriverService driverService;
+    private DriverService driverService;
 
     private Set<OvsdbNode> ovsdbNodes;
 
@@ -158,10 +158,9 @@ public class OvsdbBridgeManager implements OvsdbBridgeService {
 
         OvsdbNode ovsdbNode;
         log.info("Creating bridge {} at {}", bridgeName, ovsdbAddress);
-        log.info("Ready to start readConfiguration");
         readConfiguration();
         log.info(String.valueOf(ovsdbNodes));
-        log.info("Finish readConfiguration");
+
         try {
             //  gets the target ovsdb node
             ovsdbNode = ovsdbNodes.stream().filter(node -> node.ovsdbIp().equals(ovsdbAddress)).findFirst().get();
@@ -287,6 +286,7 @@ public class OvsdbBridgeManager implements OvsdbBridgeService {
 
         try {
             Device device = deviceService.getDevice(ovsdbNode.ovsdbId());
+
             log.debug("OvsdbNode.ovsdbId = " + ovsdbNode.ovsdbId());
             if (device == null) {
                 log.warn("Ovsdb device not found, aborting.");
