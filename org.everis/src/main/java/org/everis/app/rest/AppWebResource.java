@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -76,6 +77,99 @@ public class AppWebResource extends AbstractWebResource {
 
         } catch (OvsdbRestException.BridgeAlreadyExistsException ex) {
             return Response.status(Response.Status.CONFLICT).entity("A bridge with this name already exists").build();
+        } catch (OvsdbRestException.OvsdbDeviceException ex) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ex.getMessage()).build();
+        }
+    }
+
+    /**
+     * Delete the bridge with the given information.
+     * @param ovsdbIp OVSDB IP Address
+     * @param bridgeName Bridge Name to delete
+     * @return 200 OK if the bridge was deleted
+     */
+    @DELETE
+    @Path("/{ovsdb-ip}/bridge/{bridge-name}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response deleteBridge(@PathParam("ovsdb-ip") String ovsdbIp,
+                                 @PathParam("bridge-name") String bridgeName) {
+        try {
+
+            IpAddress ovsdbAddress = IpAddress.valueOf(ovsdbIp);
+            OvsdbBridgeService ovsdbBridgeService = get(OvsdbBridgeService.class);
+            ovsdbBridgeService.deleteBridge(ovsdbAddress, bridgeName);
+            ObjectNode node = mapper().createObjectNode().put("bridge-deleted:", "true");
+            // Return 200 OK
+            return ok(node).build();
+        } catch (OvsdbRestException.BridgeNotFoundException ex) {
+            return Response.status(Response.Status.NOT_FOUND).entity("No bridge found with the specified name").build();
+        } catch (OvsdbRestException.OvsdbDeviceException ex) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ex.getMessage()).build();
+        }
+    }
+
+    /**
+     * Add a port in the bridge with the given information.
+     * @param ovsdbIp OVSDB IP Address
+     * @param bridgeName Bridge Name
+     * @param portName Port name to add
+     * @return 200 OK
+     */
+    @POST
+    @Path("/{ovsdb-ip}/bridge/{bridge-name}/port/{port-name}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response addPort(@PathParam("ovsdb-ip") String ovsdbIp,
+                            @PathParam("bridge-name") String bridgeName,
+                            @PathParam("port-name") String portName) {
+        try {
+            log.info("See if the IP Address is valid");
+            IpAddress ovsdbAddress = IpAddress.valueOf(ovsdbIp);
+            log.info("Start the addPort function");
+            OvsdbBridgeService ovsdbBridgeService = get(OvsdbBridgeService.class);
+            ovsdbBridgeService.addPort(ovsdbAddress, bridgeName, portName);
+
+            ObjectNode node = mapper().createObjectNode().put("port-added:", "true");
+            // Return 200 OK
+            return ok(node).build();
+
+        } catch (OvsdbRestException.BridgeNotFoundException ex) {
+            return Response.status(Response.Status.NOT_FOUND).entity(
+                    "No bridge found with the specified name").build();
+        } catch (OvsdbRestException.OvsdbDeviceException ex) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ex.getMessage()).build();
+        }
+    }
+
+    /**
+     * Delete the port of a bridge.
+     * @param ovsdbIp OVSDB IP Address
+     * @param bridgeName Bridge Name
+     * @param portName Port Name to delete
+     * @return 200 OK
+     */
+    @DELETE
+    @Path("/{ovsdb-ip}/bridge/{bridge-name}/port/{port-name}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response deletePort(@PathParam("ovsdb-ip") String ovsdbIp,
+                               @PathParam("bridge-name") String bridgeName,
+                               @PathParam("port-name") String portName) {
+        try {
+            log.info("See if the IP Address is valid");
+            IpAddress ovsdbAddress = IpAddress.valueOf(ovsdbIp);
+
+            OvsdbBridgeService ovsdbBridgeService = get(OvsdbBridgeService.class);
+            ovsdbBridgeService.removePort(ovsdbAddress, bridgeName, portName);
+
+            ObjectNode node = mapper().createObjectNode().put("port-deleted:", "true");
+            // Return 200 OK
+            return ok(node).build();
+
+        } catch (OvsdbRestException.BridgeNotFoundException ex) {
+            return Response.status(Response.Status.NOT_FOUND).entity(
+                    "No bridge found with the specified name").build();
         } catch (OvsdbRestException.OvsdbDeviceException ex) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ex.getMessage()).build();
         }

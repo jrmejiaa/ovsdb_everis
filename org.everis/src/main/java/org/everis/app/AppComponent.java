@@ -20,10 +20,11 @@ import com.google.common.collect.Sets;
 import org.onlab.packet.TpPort;
 import org.onlab.util.ItemNotFoundException;
 import org.onosproject.net.Device;
+import org.onosproject.net.behaviour.BridgeName;
 import org.onosproject.net.behaviour.BridgeConfig;
 import org.onosproject.net.behaviour.BridgeDescription;
-import org.onosproject.net.behaviour.ControllerInfo;
 import org.onosproject.net.behaviour.DefaultBridgeDescription;
+import org.onosproject.net.behaviour.ControllerInfo;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -50,7 +51,6 @@ import java.util.ArrayList;
 // import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 // import java.util.concurrent.ExecutorService;
 // import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
@@ -103,8 +103,6 @@ public class AppComponent implements OvsdbBridgeService {
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
     private DriverService driverService;
-
-    private Set<OvsdbNode> ovsdbNodes;
 
     @Activate
     protected void activate() {
@@ -183,18 +181,102 @@ public class AppComponent implements OvsdbBridgeService {
     public void deleteBridge(IpAddress ovsdbAddress, String bridgeName)
             throws OvsdbDeviceException, BridgeNotFoundException {
 
+        log.warn("Deleting bridge {} at {}", bridgeName, ovsdbAddress);
+        OvsdbNode ovsdbNode = new OvsdbNode(ovsdbAddress, OVSPORT);
+
+        // Create a system to check if the name of the bridge exists
+
+        try {
+            Device device = deviceService.getDevice(ovsdbNode.ovsdbId());
+            if (device == null) {
+                log.warn("Ovsdb device not found, aborting.");
+                throw new OvsdbDeviceException("Ovsdb device not found");
+            }
+            if (device.is(BridgeConfig.class)) {
+
+                // remove bridge from ovsdb
+                BridgeConfig bridgeConfig = device.as(BridgeConfig.class);
+                bridgeConfig.deleteBridge(BridgeName.bridgeName(bridgeName));
+                bridgeIds.remove(bridgeName);
+
+//              // remove bridge from onos devices
+//              adminService.removeDevice(deviceId);
+
+                log.info("Correctly deleted bridge {} at {}", bridgeName, ovsdbAddress);
+            } else {
+                log.warn("The bridging behaviour is not supported in device {}", device.id());
+                throw new OvsdbDeviceException(
+                        "The bridging behaviour is not supported in device " + device.id()
+                );
+            }
+        } catch (ItemNotFoundException e) {
+            log.warn("Failed to delete bridge on {}", ovsdbNode.ovsdbIp());
+            throw new OvsdbDeviceException("Error with ovsdb device: item not found");
+        }
     }
 
     @Override
     public void addPort(IpAddress ovsdbAddress, String bridgeName, String portName)
             throws OvsdbDeviceException, BridgeNotFoundException {
+        log.info("Adding port {} to bridge {} at {}", portName, bridgeName, ovsdbAddress);
+        OvsdbNode ovsdbNode = new OvsdbNode(ovsdbAddress, OVSPORT);
 
+        try {
+            Device device = deviceService.getDevice(ovsdbNode.ovsdbId());
+
+            if (device == null) {
+                log.warn("Ovsdb device not found, aborting.");
+                throw new OvsdbDeviceException("Ovsdb device not found");
+            }
+            if (device.is(BridgeConfig.class)) {
+                log.info("Start Add Port Process");
+                // add port to bridge through ovsdb
+                BridgeConfig bridgeConfig = device.as(BridgeConfig.class);
+                bridgeConfig.addPort(BridgeName.bridgeName(bridgeName), portName);
+                log.info("Correctly added port {} to bridge {} at {}", portName, bridgeName, ovsdbAddress);
+            } else {
+                log.warn("The bridging behaviour is not supported in device {}", device.id());
+                throw new OvsdbDeviceException(
+                        "The bridging behaviour is not supported in device " + device.id()
+                );
+            }
+        } catch (ItemNotFoundException e) {
+            log.warn("Failed to delete bridge on {}", ovsdbNode.ovsdbIp());
+            throw new OvsdbDeviceException("Error with ovsdb device: item not found");
+        }
     }
 
     @Override
     public void removePort(IpAddress ovsdbAddress, String bridgeName, String portName)
             throws OvsdbDeviceException, BridgeNotFoundException {
 
+        log.warn("Deleting port {} to bridge {} at {}", portName, bridgeName, ovsdbAddress);
+        OvsdbNode ovsdbNode = new OvsdbNode(ovsdbAddress, OVSPORT);
+
+        try {
+            Device device = deviceService.getDevice(ovsdbNode.ovsdbId());
+            if (device == null) {
+                log.warn("Ovsdb device not found, aborting.");
+                throw new OvsdbDeviceException("Ovsdb device not found");
+            }
+            if (device.is(BridgeConfig.class)) {
+
+                // delete port from bridge through ovsdb
+                BridgeConfig bridgeConfig = device.as(BridgeConfig.class);
+                bridgeConfig.deletePort(BridgeName.bridgeName(bridgeName), portName);
+
+                log.info("Correctly deleted port {} from bridge {} at {}", portName, bridgeName, ovsdbAddress);
+
+            } else {
+                log.warn("The bridging behaviour is not supported in device {}", device.id());
+                throw new OvsdbDeviceException(
+                        "The bridging behaviour is not supported in device " + device.id()
+                );
+            }
+        } catch (ItemNotFoundException e) {
+            log.warn("Failed to delete bridge on {}", ovsdbNode.ovsdbIp());
+            throw new OvsdbDeviceException("Error with ovsdb device: item not found");
+        }
     }
 
     @Override
