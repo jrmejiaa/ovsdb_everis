@@ -82,13 +82,12 @@ public interface OvsdbBridgeService {
      * @param ovsdbAddress the ovsdb IP address
      * @param bridgeName the bridge identifier
      * @param portName the name of the new GRE port
-     * @param localIp local end point of the GRE tunnel
      * @param remoteIp remote end point of GRE tunnel
      * @param key the tunnel key, should represent a 32 bit hexadecimal number
      * @throws OvsdbRestException.OvsdbDeviceException Error Description
      * @throws OvsdbRestException.BridgeNotFoundException Error Description
      */
-    void createVxlanTunnel(IpAddress ovsdbAddress, String bridgeName, String portName, IpAddress localIp,
+    void createVxlanTunnel(IpAddress ovsdbAddress, String bridgeName, String portName,
                          IpAddress remoteIp, String key)
             throws OvsdbRestException.OvsdbDeviceException, OvsdbRestException.BridgeNotFoundException;
 

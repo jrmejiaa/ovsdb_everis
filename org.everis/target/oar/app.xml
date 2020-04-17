@@ -17,7 +17,7 @@
 <app name="org.everis.app" origin="ON.Lab" version="1.0"
         title="org.everis.app" category="default" url="http://onosproject.org"
         featuresRepo="mvn:org.everis/org.everis/1.0/xml/features"
-        features="org.everis" apps="org.onosproject.ovsdb-base,org.onosproject.drivers.ovsdb">
+        features="org.everis" apps="org.onosproject.ovsdb-base,org.onosproject.drivers.ovsdb,org.onosproject.openflow-base,org.onosproject.openflow">
     <description>ONOS REST API bundle archetype</description>
     <artifact>mvn:org.everis/org.everis/1.0</artifact>
 </app>

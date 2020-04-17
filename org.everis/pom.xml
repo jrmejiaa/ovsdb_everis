@@ -40,7 +40,9 @@
         <api.title>EVERIS rest API </api.title>
         <onos.app.requires>
             org.onosproject.ovsdb-base,
-            org.onosproject.drivers.ovsdb
+            org.onosproject.drivers.ovsdb,
+            org.onosproject.openflow-base,
+            org.onosproject.openflow
         </onos.app.requires>
         <api.description>
             EVERIS API to make control over the switches using OVSDB Protocol

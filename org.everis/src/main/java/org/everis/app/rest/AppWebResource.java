@@ -26,17 +26,12 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
 import static org.onlab.util.Tools.readTreeFromStream;
 
@@ -48,8 +43,6 @@ public class AppWebResource extends AbstractWebResource {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    private static final Set<String> CREATE_BRIDGE = new HashSet<>(Arrays.asList("a", "b"));
-
     /**
      * Get hello world greeting.
      *
@@ -58,7 +51,7 @@ public class AppWebResource extends AbstractWebResource {
     @GET
     @Path("sample/")
     public Response getGreeting() {
-        ObjectNode node = mapper().createObjectNode().put("hello", "world");
+        ObjectNode node = mapper().createObjectNode().put("Hey!", "I am working");
         return ok(node).build();
     }
 
@@ -66,10 +59,10 @@ public class AppWebResource extends AbstractWebResource {
      * Create a Bridge using JSON.
      * @param stream JSON Parameter
      * @return OK 200
-     * @onos.rsModel createBridge
+     * @onos.rsModel create_delete_Bridge
      */
     @POST
-    @Path("creatingBridge/")
+    @Path("createBridge/")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response addBridge(InputStream stream) {
@@ -83,7 +76,7 @@ public class AppWebResource extends AbstractWebResource {
             if (ovsdbIP == null || bridgeName == null) {
                 node.put("bridge-created:", "false");
                 node.put("error:", "The JSON was not complete to make the operation");
-                return Response.status(Response.Status.CONFLICT).entity(node).build();
+                return Response.status(Response.Status.BAD_REQUEST).entity(node).build();
             }
             // Changing the values to be able to use the create Bridge app
             IpAddress ovsdbAddress = IpAddress.valueOf(ovsdbIP);
@@ -93,41 +86,49 @@ public class AppWebResource extends AbstractWebResource {
 
             node.put("bridge-created:", "true");
             return ok(node).build();
-        } catch (OvsdbRestException.OvsdbDeviceException ex) {
+        } catch (OvsdbRestException.OvsdbDeviceException | IOException ex) {
             node.put("bridge-created:", "false");
             node.put("error:", ex.getMessage());
-            return Response.status(Response.Status.CONFLICT).entity(node).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(node).build();
         } catch (OvsdbRestException.BridgeAlreadyExistsException ex) {
             node.put("bridge-created:", "false");
             node.put("error:",
                     "The Bridge Already Exists, please use another name");
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(node).build();
-        } catch (IOException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(node).build();
+        } catch (Exception ex) {
             node.put("bridge-created:", "false");
-            node.put("error:",
-                    "The JSON has build problems, please make sure that you have all the required elements");
+            node.put("error:", "There was an error with the structure of the JSON");
             return Response.status(Response.Status.CONFLICT).entity(node).build();
         }
     }
 
     /**
-     * Delete the bridge with the given information.
-     * @param ovsdbIp OVSDB IP Address
-     * @param bridgeName Bridge Name to delete
-     * @return 200 OK if the bridge was deleted
+     * Delete a Bridge using JSON.
+     * @param stream JSON Parameter
+     * @return OK 200
+     * @onos.rsModel create_delete_Bridge
      */
-    @DELETE
-    @Path("/{ovsdb-ip}/bridge/{bridge-name}")
+    @POST
+    @Path("deleteBridge/")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response deleteBridge(@PathParam("ovsdb-ip") String ovsdbIp,
-                                 @PathParam("bridge-name") String bridgeName) {
+    public Response deleteBridge(InputStream stream) {
 
         ObjectNode node = mapper().createObjectNode();
-
         try {
+            ObjectNode jsonTree = readTreeFromStream(mapper(), stream);
 
-            IpAddress ovsdbAddress = IpAddress.valueOf(ovsdbIp);
+            String ovsdbIP = jsonTree.get("ovsdb-ip").asText();
+            String bridgeName = jsonTree.get("bridge-name").asText();
+
+            if (ovsdbIP == null || bridgeName == null) {
+                node.put("bridge-created:", "false");
+                node.put("error:", "The JSON was not complete to make the operation");
+                return Response.status(Response.Status.BAD_REQUEST).entity(node).build();
+            }
+            // Changing the values to be able to use the create Bridge app
+            IpAddress ovsdbAddress = IpAddress.valueOf(ovsdbIP);
+
             OvsdbBridgeService ovsdbBridgeService = get(OvsdbBridgeService.class);
             ovsdbBridgeService.deleteBridge(ovsdbAddress, bridgeName);
 
@@ -137,32 +138,44 @@ public class AppWebResource extends AbstractWebResource {
         } catch (OvsdbRestException.BridgeNotFoundException ex) {
             node.put("bridge-created:", "false");
             node.put("error:", "The bridge was not found");
-            return Response.status(Response.Status.NOT_FOUND).entity(node).build();
-        } catch (OvsdbRestException.OvsdbDeviceException ex) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(node).build();
+        } catch (OvsdbRestException.OvsdbDeviceException | IOException ex) {
             node.put("bridge-created:", "false");
             node.put("error:", ex.getMessage());
+            return Response.status(Response.Status.BAD_REQUEST).entity(node).build();
+        } catch (Exception ex) {
+            node.put("bridge-created:", "false");
+            node.put("error:", "There was an error with the structure of the JSON");
             return Response.status(Response.Status.CONFLICT).entity(node).build();
         }
     }
 
     /**
      * Add a port in the bridge with the given information.
-     * @param ovsdbIp OVSDB IP Address
-     * @param bridgeName Bridge Name
-     * @param portName Port name to add
+     * @param stream JSON Parameter
      * @return 200 OK
+     * @onos.rsModel add_delete_Port
      */
     @POST
-    @Path("/{ovsdb-ip}/bridge/{bridge-name}/port/{port-name}")
+    @Path("addPort/")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response addPort(@PathParam("ovsdb-ip") String ovsdbIp,
-                            @PathParam("bridge-name") String bridgeName,
-                            @PathParam("port-name") String portName) {
+    public Response addPort(InputStream stream) {
         ObjectNode node = mapper().createObjectNode();
         try {
+            ObjectNode jsonTree = readTreeFromStream(mapper(), stream);
+
+            String ovsdbIP = jsonTree.get("ovsdb-ip").asText();
+            String bridgeName = jsonTree.get("bridge-name").asText();
+            String portName = jsonTree.get("port-name").asText();
+
+            if (ovsdbIP == null || bridgeName == null || portName == null) {
+                node.put("bridge-created:", "false");
+                node.put("error:", "The JSON was not complete to make the operation");
+                return Response.status(Response.Status.BAD_REQUEST).entity(node).build();
+            }
             log.info("See if the IP Address is valid");
-            IpAddress ovsdbAddress = IpAddress.valueOf(ovsdbIp);
+            IpAddress ovsdbAddress = IpAddress.valueOf(ovsdbIP);
             log.info("Start the addPort function");
             OvsdbBridgeService ovsdbBridgeService = get(OvsdbBridgeService.class);
             ovsdbBridgeService.addPort(ovsdbAddress, bridgeName, portName);
@@ -172,34 +185,46 @@ public class AppWebResource extends AbstractWebResource {
             return ok(node).build();
 
         } catch (OvsdbRestException.BridgeNotFoundException ex) {
-            node.put("bridge-created:", "false");
+            node.put("port-added:", "false");
             node.put("error:", "The bridge was not found");
-            return Response.status(Response.Status.NOT_FOUND).entity(node).build();
-        } catch (OvsdbRestException.OvsdbDeviceException ex) {
-            node.put("bridge-created:", "false");
+            return Response.status(Response.Status.BAD_REQUEST).entity(node).build();
+        } catch (OvsdbRestException.OvsdbDeviceException | IOException ex) {
+            node.put("port-added:", "false");
             node.put("error:", ex.getMessage());
+            return Response.status(Response.Status.BAD_REQUEST).entity(node).build();
+        } catch (Exception ex) {
+            node.put("bridge-created:", "false");
+            node.put("error:", "There was an error with the structure of the JSON");
             return Response.status(Response.Status.CONFLICT).entity(node).build();
         }
     }
 
     /**
      * Delete the port of a bridge.
-     * @param ovsdbIp OVSDB IP Address
-     * @param bridgeName Bridge Name
-     * @param portName Port Name to delete
+     * @param stream JSON Parameter
      * @return 200 OK
+     * @onos.rsModel add_delete_Port
      */
-    @DELETE
-    @Path("/{ovsdb-ip}/bridge/{bridge-name}/port/{port-name}")
+    @POST
+    @Path("deletePort/")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response deletePort(@PathParam("ovsdb-ip") String ovsdbIp,
-                               @PathParam("bridge-name") String bridgeName,
-                               @PathParam("port-name") String portName) {
+    public Response deletePort(InputStream stream) {
         ObjectNode node = mapper().createObjectNode();
         try {
+            ObjectNode jsonTree = readTreeFromStream(mapper(), stream);
+
+            String ovsdbIP = jsonTree.get("ovsdb-ip").asText();
+            String bridgeName = jsonTree.get("bridge-name").asText();
+            String portName = jsonTree.get("port-name").asText();
+
+            if (ovsdbIP == null || bridgeName == null || portName == null) {
+                node.put("bridge-created:", "false");
+                node.put("error:", "The JSON was not complete to make the operation");
+                return Response.status(Response.Status.BAD_REQUEST).entity(node).build();
+            }
             log.info("See if the IP Address is valid");
-            IpAddress ovsdbAddress = IpAddress.valueOf(ovsdbIp);
+            IpAddress ovsdbAddress = IpAddress.valueOf(ovsdbIP);
 
             OvsdbBridgeService ovsdbBridgeService = get(OvsdbBridgeService.class);
             ovsdbBridgeService.removePort(ovsdbAddress, bridgeName, portName);
@@ -211,32 +236,43 @@ public class AppWebResource extends AbstractWebResource {
         } catch (OvsdbRestException.BridgeNotFoundException ex) {
             node.put("bridge-created:", "false");
             node.put("error:", "The bridge was not found");
-            return Response.status(Response.Status.NOT_FOUND).entity(node).build();
-        } catch (OvsdbRestException.OvsdbDeviceException ex) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(node).build();
+        } catch (OvsdbRestException.OvsdbDeviceException | IOException ex) {
             node.put("bridge-created:", "false");
             node.put("error:", ex.getMessage());
+            return Response.status(Response.Status.BAD_REQUEST).entity(node).build();
+        } catch (Exception ex) {
+            node.put("bridge-created:", "false");
+            node.put("error:", "There was an error with the structure of the JSON");
             return Response.status(Response.Status.CONFLICT).entity(node).build();
         }
     }
 
     /**
      * Creates Patch Peer Port to connect with another port.
-     * @param ovsdbIp OVSDB IP Address
-     * @param bridgeName Name of the Bridge
-     * @param portName Port Name
-     * @param patchPeer PatchPeer
+     * @param stream JSON Configuration
      * @return 200 OK If everything goes fine
+     * @onos.rsModel createPatchPeerPort
      */
     @POST
-    @Path("/{ovsdb-ip}/bridge/{bridge-name}/port/{port-name}/patch_peer/{patch-peer}")
+    @Path("createPatchPeerPort/")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response createPatchPeerPort(@PathParam("ovsdb-ip") String ovsdbIp,
-                                        @PathParam("bridge-name") String bridgeName,
-                                        @PathParam("port-name") String portName,
-                                        @PathParam("patch-peer") String patchPeer) {
+    public Response createPatchPeerPort(InputStream stream) {
         ObjectNode node = mapper().createObjectNode();
         try {
+            ObjectNode jsonTree = readTreeFromStream(mapper(), stream);
+
+            String ovsdbIp = jsonTree.get("ovsdb-ip").asText();
+            String bridgeName = jsonTree.get("bridge-name").asText();
+            String portName = jsonTree.get("port-name").asText();
+            String patchPeer = jsonTree.get("patch-peer").asText();
+
+            if (ovsdbIp == null || bridgeName == null || portName == null || patchPeer == null) {
+                node.put("bridge-created:", "false");
+                node.put("error:", "The JSON was not complete to make the operation");
+                return Response.status(Response.Status.BAD_REQUEST).entity(node).build();
+            }
             log.info("Checking the address...");
             IpAddress ovsdbAddress = IpAddress.valueOf(ovsdbIp);
             log.info("Start the process in the createPatchPeerPort function...");
@@ -246,56 +282,71 @@ public class AppWebResource extends AbstractWebResource {
             node.put("patch-peer-created:", "true");
             // Return 200 OK
             return ok(node).build();
-        } catch (OvsdbRestException.OvsdbDeviceException ex) {
+        } catch (OvsdbRestException.OvsdbDeviceException | IOException ex) {
             node.put("bridge-created:", "false");
             node.put("error:", ex.getMessage());
-            return Response.status(Response.Status.CONFLICT).entity(node).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(node).build();
         } catch (OvsdbRestException.BridgeNotFoundException ex) {
             node.put("bridge-created:", "false");
             node.put("error:", "The bridge was not found");
-            return Response.status(Response.Status.NOT_FOUND).entity(node).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(node).build();
+        } catch (Exception ex) {
+            node.put("bridge-created:", "false");
+            node.put("error:", "There was an error with the structure of the JSON");
+            return Response.status(Response.Status.CONFLICT).entity(node).build();
         }
     }
 
     /**
      * Create a VXLAN Tunnel Port.
-     * @param ovsdbIp OVSDB IP Address
-     * @param bridgeName Bridge Name
-     * @param portName Port Name
-     * @param localIp Local IP
-     * @param remoteIp Remote IP
-     * @param key it has to be flow
+     * @param stream JSON Configuration
+     * @onos.rsModel addVxlanTunnel
      * @return OK 200
      */
     @POST
-    @Path("/{ovsdb-ip}/bridge/{bridge-name}/port/{port-name}/gre/{local-ip}/{remote-ip}/{key}")
+    @Path("createVxlanTunnel/")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response addVxlanTunnel(@PathParam("ovsdb-ip") String ovsdbIp,
-                                 @PathParam("bridge-name") String bridgeName,
-                                 @PathParam("port-name") String portName,
-                                 @PathParam("local-ip") String localIp,
-                                 @PathParam("remote-ip") String remoteIp,
-                                 @PathParam("key") String key) {
+    public Response addVxlanTunnel(InputStream stream) {
         ObjectNode node = mapper().createObjectNode();
         try {
+            ObjectNode jsonTree = readTreeFromStream(mapper(), stream);
+
+            String ovsdbIp = jsonTree.get("ovsdb-ip").asText();
+            String bridgeName = jsonTree.get("bridge-name").asText();
+            String portName = jsonTree.get("port-name").asText();
+            String remoteIp = jsonTree.get("remote-ip").asText();
+            String key = jsonTree.get("key").asText();
+
+
+            if (ovsdbIp == null || bridgeName == null || portName == null ||
+                    remoteIp == null || key == null) {
+                node.put("bridge-created:", "false");
+                node.put("error:", "The JSON was not complete to make the operation");
+                return Response.status(Response.Status.CONFLICT).entity(node).build();
+            }
             IpAddress ovsdbAddress = IpAddress.valueOf(ovsdbIp);
-            IpAddress tunnelLocalIp = IpAddress.valueOf(localIp);
             IpAddress tunnelRemoteIp = IpAddress.valueOf(remoteIp);
             log.info("Start the createVXLAN function...");
             OvsdbBridgeService ovsdbBridgeService = get(OvsdbBridgeService.class);
             ovsdbBridgeService.createVxlanTunnel(ovsdbAddress, bridgeName,
-                    portName, tunnelLocalIp, tunnelRemoteIp, key);
+                    portName, tunnelRemoteIp, key);
 
             node.put("vxlan-created:", "true");
             // Return 200 OK
             return ok(node).build();
 
         } catch (OvsdbRestException.BridgeNotFoundException ex) {
-            return Response.status(Response.Status.NOT_FOUND).entity("No bridge found with the specified name").build();
-        } catch (OvsdbRestException.OvsdbDeviceException ex) {
             node.put("bridge-created:", "false");
             node.put("error:", "The bridge was not found");
+            return Response.status(Response.Status.BAD_REQUEST).entity(node).build();
+        } catch (OvsdbRestException.OvsdbDeviceException | IOException ex) {
+            node.put("bridge-created:", "false");
+            node.put("error:", ex.getMessage());
+            return Response.status(Response.Status.BAD_REQUEST).entity(node).build();
+        } catch (Exception ex) {
+            node.put("bridge-created:", "false");
+            node.put("error:", "There was an error with the structure of the JSON");
             return Response.status(Response.Status.CONFLICT).entity(node).build();
         }
     }

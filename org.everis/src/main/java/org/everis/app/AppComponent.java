@@ -150,8 +150,7 @@ public class AppComponent implements OvsdbBridgeService {
 
         List<ControllerInfo> controllers = new ArrayList<>();
         Sets.newHashSet(clusterService.getNodes()).forEach(controller -> {
-            //ControllerInfo ctrlInfo = new ControllerInfo(controller.ip(), OFPORT, "tcp");
-            ControllerInfo ctrlInfo = new ControllerInfo(IpAddress.valueOf("35.232.247.116"), OFPORT, "tcp");
+            ControllerInfo ctrlInfo = new ControllerInfo(controller.ip(), OFPORT, "tcp");
             controllers.add(ctrlInfo);
             log.info("controller {}:{} added", ctrlInfo.ip().toString(), ctrlInfo.port());
         });
@@ -357,11 +356,11 @@ public class AppComponent implements OvsdbBridgeService {
 
     @Override
     public void createVxlanTunnel(IpAddress ovsdbAddress, String bridgeName, String portName,
-                                IpAddress localIp, IpAddress remoteIp, String key)
+                                  IpAddress remoteIp, String key)
             throws OvsdbDeviceException, BridgeNotFoundException {
 
-        log.info("Setting up tunnel VXLAN from {} to {} with key {}",
-                localIp, remoteIp, key);
+        log.info("Setting up tunnel VXLAN to {} with key {}",
+                remoteIp, key);
         OvsdbNode ovsdbNode = new OvsdbNode(ovsdbAddress, OVSPORT);
 
         // Get all the bridges
@@ -387,14 +386,12 @@ public class AppComponent implements OvsdbBridgeService {
                         .deviceId(bridgeName)
                         .ifaceName(portName)
                         .type(TunnelDescription.Type.VXLAN)
-                        //.local(TunnelEndPoints.ipTunnelEndpoint(localIp))
                         .remote(TunnelEndPoints.ipTunnelEndpoint(remoteIp))
                         .key(new TunnelKey<>(key))
                         .build();
                 // create tunnel to port through ovsdb
                 interfaceConfig.addTunnelMode(portName, tunnelDescription);
-                log.info("Correctly added tunnel GRE from {} to {} with key {}",
-                        localIp, remoteIp, key);
+                log.info("Correctly added tunnel VXLAN to {} with key {}", remoteIp, key);
             } else {
                 log.warn("The interface behaviour is not supported in device {}", device.id());
                 throw new OvsdbDeviceException(
