@@ -23,7 +23,11 @@ import org.onosproject.net.Device;
 import org.onosproject.net.behaviour.BridgeName;
 import org.onosproject.net.behaviour.BridgeConfig;
 import org.onosproject.net.behaviour.BridgeDescription;
+import org.onosproject.net.behaviour.TunnelDescription;
+import org.onosproject.net.behaviour.TunnelEndPoints;
+import org.onosproject.net.behaviour.TunnelKey;
 import org.onosproject.net.behaviour.DefaultBridgeDescription;
+import org.onosproject.net.behaviour.DefaultTunnelDescription;
 import org.onosproject.net.behaviour.ControllerInfo;
 import org.onosproject.net.behaviour.DefaultPatchDescription;
 import org.onosproject.net.behaviour.PatchDescription;
@@ -148,7 +152,8 @@ public class AppComponent implements OvsdbBridgeService {
 
         List<ControllerInfo> controllers = new ArrayList<>();
         Sets.newHashSet(clusterService.getNodes()).forEach(controller -> {
-            ControllerInfo ctrlInfo = new ControllerInfo(controller.ip(), OFPORT, "tcp");
+            //ControllerInfo ctrlInfo = new ControllerInfo(controller.ip(), OFPORT, "tcp");
+            ControllerInfo ctrlInfo = new ControllerInfo(IpAddress.valueOf("35.232.247.116"), OFPORT, "tcp");
             controllers.add(ctrlInfo);
             log.info("controller {}:{} added", ctrlInfo.ip().toString(), ctrlInfo.port());
         });
@@ -320,10 +325,48 @@ public class AppComponent implements OvsdbBridgeService {
     }
 
     @Override
-    public void createGreTunnel(IpAddress ovsdbAddress, String bridgeName, String portName,
+    public void createVxlanTunnel(IpAddress ovsdbAddress, String bridgeName, String portName,
                                 IpAddress localIp, IpAddress remoteIp, String key)
             throws OvsdbDeviceException, BridgeNotFoundException {
 
+        log.info("Setting up tunnel VXLAN from {} to {} with key {}",
+                localIp, remoteIp, key);
+        OvsdbNode ovsdbNode = new OvsdbNode(ovsdbAddress, OVSPORT);
+
+        try {
+            Device device = deviceService.getDevice(ovsdbNode.ovsdbId());
+            log.debug("OvsdbNode.ovsdbId = " + ovsdbNode.ovsdbId());
+            if (device == null) {
+                log.warn("Ovsdb device not found, aborting.");
+                throw new OvsdbDeviceException("Ovsdb device not found");
+            }
+
+            if (device.is(InterfaceConfig.class)) {
+                InterfaceConfig interfaceConfig = device.as(InterfaceConfig.class);
+
+                // prepare tunnel
+                TunnelDescription tunnelDescription = DefaultTunnelDescription.builder()
+                        .deviceId(bridgeName)
+                        .ifaceName(portName)
+                        .type(TunnelDescription.Type.VXLAN)
+                        //.local(TunnelEndPoints.ipTunnelEndpoint(localIp))
+                        .remote(TunnelEndPoints.ipTunnelEndpoint(remoteIp))
+                        .key(new TunnelKey<>(key))
+                        .build();
+                // create tunnel to port through ovsdb
+                interfaceConfig.addTunnelMode(portName, tunnelDescription);
+                log.info("Correctly added tunnel GRE from {} to {} with key {}",
+                        localIp, remoteIp, key);
+            } else {
+                log.warn("The interface behaviour is not supported in device {}", device.id());
+                throw new OvsdbDeviceException(
+                        "The interface behaviour is not supported in device " + device.id()
+                );
+            }
+        } catch (ItemNotFoundException e) {
+            log.warn("Failed to delete bridge on {}", ovsdbNode.ovsdbIp());
+            throw new OvsdbDeviceException("Error with ovsdb device: item not found");
+        }
     }
 
     @Override

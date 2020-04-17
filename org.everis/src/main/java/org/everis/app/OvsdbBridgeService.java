@@ -87,7 +87,7 @@ public interface OvsdbBridgeService {
      * @throws OvsdbRestException.OvsdbDeviceException Error Description
      * @throws OvsdbRestException.BridgeNotFoundException Error Description
      */
-    void createGreTunnel(IpAddress ovsdbAddress, String bridgeName, String portName, IpAddress localIp,
+    void createVxlanTunnel(IpAddress ovsdbAddress, String bridgeName, String portName, IpAddress localIp,
                          IpAddress remoteIp, String key)
             throws OvsdbRestException.OvsdbDeviceException, OvsdbRestException.BridgeNotFoundException;
 
