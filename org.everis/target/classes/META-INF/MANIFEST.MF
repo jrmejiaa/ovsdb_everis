@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1587082745248
+Bnd-LastModified: 1587101313093
 Build-Jdk: 11.0.6
 Built-By: jairom
 Bundle-ClassPath: WEB-INF/classes
@@ -35,17 +35,16 @@ Require-Capability: osgi.service;filter:="(objectClass=org.onosproject.c
  jectClass=org.onosproject.cluster.ClusterService)";effective:=active,os
  gi.service;filter:="(objectClass=org.onosproject.core.CoreService)";eff
  ective:=active,osgi.service;filter:="(objectClass=org.onosproject.net.c
- onfig.NetworkConfigRegistry)";effective:=active,osgi.service;filter:="(
- objectClass=org.onosproject.net.config.NetworkConfigService)";effective
- :=active,osgi.service;filter:="(objectClass=org.onosproject.net.device.
- DeviceAdminService)";effective:=active,osgi.service;filter:="(objectCla
- ss=org.onosproject.net.device.DeviceService)";effective:=active,osgi.se
- rvice;filter:="(objectClass=org.onosproject.net.driver.DriverService)";
- effective:=active,osgi.service;filter:="(objectClass=org.onosproject.ov
- sdb.controller.OvsdbController)";effective:=active,osgi.service;filter:
- ="(objectClass=org.onosproject.rest.ApiDocService)";effective:=active,o
- sgi.extender;filter:="(&(osgi.extender=osgi.component)(version>=1.4.0)(
- !(version>=2.0.0)))",osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=11))"
+ onfig.NetworkConfigService)";effective:=active,osgi.service;filter:="(o
+ bjectClass=org.onosproject.net.device.DeviceAdminService)";effective:=a
+ ctive,osgi.service;filter:="(objectClass=org.onosproject.net.device.Dev
+ iceService)";effective:=active,osgi.service;filter:="(objectClass=org.o
+ nosproject.net.driver.DriverService)";effective:=active,osgi.service;fi
+ lter:="(objectClass=org.onosproject.ovsdb.controller.OvsdbController)";
+ effective:=active,osgi.service;filter:="(objectClass=org.onosproject.re
+ st.ApiDocService)";effective:=active,osgi.extender;filter:="(&(osgi.ext
+ ender=osgi.component)(version>=1.4.0)(!(version>=2.0.0)))",osgi.ee;filt
+ er:="(&(osgi.ee=JavaSE)(version=11))"
 Service-Component: OSGI-INF/everis.ApiDocRegistrator.xml,OSGI-INF/org.ev
  eris.app.AppComponent.xml
 Tool: Bnd-4.1.0.201810181252

@@ -72,9 +72,10 @@ public interface OvsdbBridgeService {
      * @param portName the port name
      * @param patchPeer the name of the peer port
      * @throws OvsdbRestException.OvsdbDeviceException Error Description
+     * @throws OvsdbRestException.BridgeNotFoundException Error Description
      */
     void createPatchPeerPort(IpAddress ovsdbAddress, String bridgeName, String portName, String patchPeer)
-            throws OvsdbRestException.OvsdbDeviceException;
+            throws OvsdbRestException.OvsdbDeviceException, OvsdbRestException.BridgeNotFoundException;
 
     /**
      * Creates a GRE tunnel from a bridge to a remote destination.

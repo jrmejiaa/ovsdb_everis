@@ -82,7 +82,7 @@ public class AppWebResource extends AbstractWebResource {
 
             if (ovsdbIP == null || bridgeName == null) {
                 node.put("bridge-created:", "false");
-                node.put("error:","The JSON was not complete to make the operation");
+                node.put("error:", "The JSON was not complete to make the operation");
                 return Response.status(Response.Status.CONFLICT).entity(node).build();
             }
             // Changing the values to be able to use the create Bridge app
@@ -93,9 +93,9 @@ public class AppWebResource extends AbstractWebResource {
 
             node.put("bridge-created:", "true");
             return ok(node).build();
-        } catch (OvsdbRestException.OvsdbDeviceException e) {
+        } catch (OvsdbRestException.OvsdbDeviceException ex) {
             node.put("bridge-created:", "false");
-            node.put("error:", "We can't find the device in ONOS");
+            node.put("error:", ex.getMessage());
             return Response.status(Response.Status.CONFLICT).entity(node).build();
         } catch (OvsdbRestException.BridgeAlreadyExistsException ex) {
             node.put("bridge-created:", "false");
@@ -122,18 +122,26 @@ public class AppWebResource extends AbstractWebResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteBridge(@PathParam("ovsdb-ip") String ovsdbIp,
                                  @PathParam("bridge-name") String bridgeName) {
+
+        ObjectNode node = mapper().createObjectNode();
+
         try {
 
             IpAddress ovsdbAddress = IpAddress.valueOf(ovsdbIp);
             OvsdbBridgeService ovsdbBridgeService = get(OvsdbBridgeService.class);
             ovsdbBridgeService.deleteBridge(ovsdbAddress, bridgeName);
-            ObjectNode node = mapper().createObjectNode().put("bridge-deleted:", "true");
+
+            node.put("bridge-deleted:", "true");
             // Return 200 OK
             return ok(node).build();
         } catch (OvsdbRestException.BridgeNotFoundException ex) {
-            return Response.status(Response.Status.NOT_FOUND).entity("No bridge found with the specified name").build();
+            node.put("bridge-created:", "false");
+            node.put("error:", "The bridge was not found");
+            return Response.status(Response.Status.NOT_FOUND).entity(node).build();
         } catch (OvsdbRestException.OvsdbDeviceException ex) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ex.getMessage()).build();
+            node.put("bridge-created:", "false");
+            node.put("error:", ex.getMessage());
+            return Response.status(Response.Status.CONFLICT).entity(node).build();
         }
     }
 
@@ -151,6 +159,7 @@ public class AppWebResource extends AbstractWebResource {
     public Response addPort(@PathParam("ovsdb-ip") String ovsdbIp,
                             @PathParam("bridge-name") String bridgeName,
                             @PathParam("port-name") String portName) {
+        ObjectNode node = mapper().createObjectNode();
         try {
             log.info("See if the IP Address is valid");
             IpAddress ovsdbAddress = IpAddress.valueOf(ovsdbIp);
@@ -158,15 +167,18 @@ public class AppWebResource extends AbstractWebResource {
             OvsdbBridgeService ovsdbBridgeService = get(OvsdbBridgeService.class);
             ovsdbBridgeService.addPort(ovsdbAddress, bridgeName, portName);
 
-            ObjectNode node = mapper().createObjectNode().put("port-added:", "true");
+            node.put("port-added:", "true");
             // Return 200 OK
             return ok(node).build();
 
         } catch (OvsdbRestException.BridgeNotFoundException ex) {
-            return Response.status(Response.Status.NOT_FOUND).entity(
-                    "No bridge found with the specified name").build();
+            node.put("bridge-created:", "false");
+            node.put("error:", "The bridge was not found");
+            return Response.status(Response.Status.NOT_FOUND).entity(node).build();
         } catch (OvsdbRestException.OvsdbDeviceException ex) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ex.getMessage()).build();
+            node.put("bridge-created:", "false");
+            node.put("error:", ex.getMessage());
+            return Response.status(Response.Status.CONFLICT).entity(node).build();
         }
     }
 
@@ -184,6 +196,7 @@ public class AppWebResource extends AbstractWebResource {
     public Response deletePort(@PathParam("ovsdb-ip") String ovsdbIp,
                                @PathParam("bridge-name") String bridgeName,
                                @PathParam("port-name") String portName) {
+        ObjectNode node = mapper().createObjectNode();
         try {
             log.info("See if the IP Address is valid");
             IpAddress ovsdbAddress = IpAddress.valueOf(ovsdbIp);
@@ -191,15 +204,18 @@ public class AppWebResource extends AbstractWebResource {
             OvsdbBridgeService ovsdbBridgeService = get(OvsdbBridgeService.class);
             ovsdbBridgeService.removePort(ovsdbAddress, bridgeName, portName);
 
-            ObjectNode node = mapper().createObjectNode().put("port-deleted:", "true");
+            node.put("port-deleted:", "true");
             // Return 200 OK
             return ok(node).build();
 
         } catch (OvsdbRestException.BridgeNotFoundException ex) {
-            return Response.status(Response.Status.NOT_FOUND).entity(
-                    "No bridge found with the specified name").build();
+            node.put("bridge-created:", "false");
+            node.put("error:", "The bridge was not found");
+            return Response.status(Response.Status.NOT_FOUND).entity(node).build();
         } catch (OvsdbRestException.OvsdbDeviceException ex) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ex.getMessage()).build();
+            node.put("bridge-created:", "false");
+            node.put("error:", ex.getMessage());
+            return Response.status(Response.Status.CONFLICT).entity(node).build();
         }
     }
 
@@ -219,6 +235,7 @@ public class AppWebResource extends AbstractWebResource {
                                         @PathParam("bridge-name") String bridgeName,
                                         @PathParam("port-name") String portName,
                                         @PathParam("patch-peer") String patchPeer) {
+        ObjectNode node = mapper().createObjectNode();
         try {
             log.info("Checking the address...");
             IpAddress ovsdbAddress = IpAddress.valueOf(ovsdbIp);
@@ -226,11 +243,17 @@ public class AppWebResource extends AbstractWebResource {
             OvsdbBridgeService ovsdbBridgeService = get(OvsdbBridgeService.class);
             ovsdbBridgeService.createPatchPeerPort(ovsdbAddress, bridgeName, portName, patchPeer);
 
-            ObjectNode node = mapper().createObjectNode().put("patch-peer-created:", "true");
+            node.put("patch-peer-created:", "true");
             // Return 200 OK
             return ok(node).build();
         } catch (OvsdbRestException.OvsdbDeviceException ex) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ex.getMessage()).build();
+            node.put("bridge-created:", "false");
+            node.put("error:", ex.getMessage());
+            return Response.status(Response.Status.CONFLICT).entity(node).build();
+        } catch (OvsdbRestException.BridgeNotFoundException ex) {
+            node.put("bridge-created:", "false");
+            node.put("error:", "The bridge was not found");
+            return Response.status(Response.Status.NOT_FOUND).entity(node).build();
         }
     }
 
@@ -248,12 +271,13 @@ public class AppWebResource extends AbstractWebResource {
     @Path("/{ovsdb-ip}/bridge/{bridge-name}/port/{port-name}/gre/{local-ip}/{remote-ip}/{key}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response addGreTunnel(@PathParam("ovsdb-ip") String ovsdbIp,
+    public Response addVxlanTunnel(@PathParam("ovsdb-ip") String ovsdbIp,
                                  @PathParam("bridge-name") String bridgeName,
                                  @PathParam("port-name") String portName,
                                  @PathParam("local-ip") String localIp,
                                  @PathParam("remote-ip") String remoteIp,
                                  @PathParam("key") String key) {
+        ObjectNode node = mapper().createObjectNode();
         try {
             IpAddress ovsdbAddress = IpAddress.valueOf(ovsdbIp);
             IpAddress tunnelLocalIp = IpAddress.valueOf(localIp);
@@ -263,15 +287,16 @@ public class AppWebResource extends AbstractWebResource {
             ovsdbBridgeService.createVxlanTunnel(ovsdbAddress, bridgeName,
                     portName, tunnelLocalIp, tunnelRemoteIp, key);
 
-            ObjectNode node = mapper().createObjectNode().put("vxlan-created:", "true");
-
+            node.put("vxlan-created:", "true");
             // Return 200 OK
             return ok(node).build();
 
         } catch (OvsdbRestException.BridgeNotFoundException ex) {
             return Response.status(Response.Status.NOT_FOUND).entity("No bridge found with the specified name").build();
         } catch (OvsdbRestException.OvsdbDeviceException ex) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ex.getMessage()).build();
+            node.put("bridge-created:", "false");
+            node.put("error:", "The bridge was not found");
+            return Response.status(Response.Status.CONFLICT).entity(node).build();
         }
     }
 }

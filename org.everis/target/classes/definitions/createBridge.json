@@ -8,7 +8,7 @@
         "ovsdb-ip": {
             "type": "string",
             "format": "IpAddress",
-            "example": "10.128.15.198"
+            "example": "35.232.247.116"
         },
         "bridge-name": {
             "type": "string",

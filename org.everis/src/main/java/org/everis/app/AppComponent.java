@@ -20,6 +20,7 @@ import com.google.common.collect.Sets;
 import org.onlab.packet.TpPort;
 import org.onlab.util.ItemNotFoundException;
 import org.onosproject.net.Device;
+import org.onosproject.net.DeviceId;
 import org.onosproject.net.behaviour.BridgeName;
 import org.onosproject.net.behaviour.BridgeConfig;
 import org.onosproject.net.behaviour.BridgeDescription;
@@ -29,9 +30,11 @@ import org.onosproject.net.behaviour.TunnelKey;
 import org.onosproject.net.behaviour.DefaultBridgeDescription;
 import org.onosproject.net.behaviour.DefaultTunnelDescription;
 import org.onosproject.net.behaviour.ControllerInfo;
+import org.onosproject.net.behaviour.ControllerConfig;
 import org.onosproject.net.behaviour.DefaultPatchDescription;
 import org.onosproject.net.behaviour.PatchDescription;
 import org.onosproject.net.behaviour.InterfaceConfig;
+import org.onosproject.net.driver.DriverHandler;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -44,8 +47,6 @@ import org.onosproject.cfg.ComponentConfigService;
 import org.onosproject.cluster.ClusterService;
 import org.onosproject.core.ApplicationId;
 import org.onosproject.core.CoreService;
-import org.onosproject.net.DeviceId;
-import org.onosproject.net.config.NetworkConfigRegistry;
 import org.onosproject.net.config.NetworkConfigService;
 import org.onosproject.net.device.DeviceAdminService;
 import org.onosproject.net.device.DeviceService;
@@ -54,12 +55,10 @@ import org.onosproject.ovsdb.controller.OvsdbController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-// import java.util.HashSet;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
-// import java.util.concurrent.ExecutorService;
-// import java.util.Optional;
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.everis.app.OvsdbNodeConfig.OvsdbNode;
@@ -97,9 +96,6 @@ public class AppComponent implements OvsdbBridgeService {
     private ClusterService clusterService;
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
-    private NetworkConfigRegistry configRegistry;
-
-    @Reference(cardinality = ReferenceCardinality.MANDATORY)
     private NetworkConfigService configService;
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
@@ -110,6 +106,15 @@ public class AppComponent implements OvsdbBridgeService {
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
     private DriverService driverService;
+
+    private ApplicationId appId;
+    private static final int DPID_BEGIN = 4;
+    private static final int OFPORT = 6633;
+    private static final TpPort OVSPORT = TpPort.tpPort(6640);
+    private final AtomicLong datapathId = new AtomicLong(DPID_BEGIN);
+
+    // {bridgeName: datapathId} structure to manage the creation/deletion of bridges
+    private Map<String, DeviceId> bridgeIds = Maps.newConcurrentMap();
 
     @Activate
     protected void activate() {
@@ -128,20 +133,13 @@ public class AppComponent implements OvsdbBridgeService {
         log.info("Reconfigured");
     }
 
-    private ApplicationId appId;
-    private static final int DPID_BEGIN = 4;
-    private static final int OFPORT = 6633;
-    private static final TpPort OVSPORT = TpPort.tpPort(6640);
-    private final AtomicLong datapathId = new AtomicLong(DPID_BEGIN);
-
-    // {bridgeName: datapathId} structure to manage the creation/deletion of bridges
-    private Map<String, DeviceId> bridgeIds = Maps.newConcurrentMap();
-
     @Override
     public void createBridge(IpAddress ovsdbAddress, String bridgeName)
             throws OvsdbDeviceException, BridgeAlreadyExistsException {
         OvsdbNode ovsdbNode = new OvsdbNode(ovsdbAddress, OVSPORT);
 
+        // Get all the bridge devices
+        getAllBridges();
         // construct a unique dev id'
         DeviceId dpid = getNextUniqueDatapathId(datapathId);
 
@@ -192,8 +190,14 @@ public class AppComponent implements OvsdbBridgeService {
         log.warn("Deleting bridge {} at {}", bridgeName, ovsdbAddress);
         OvsdbNode ovsdbNode = new OvsdbNode(ovsdbAddress, OVSPORT);
 
-        // Create a system to check if the name of the bridge exists
-
+        // Get all the bridge devices
+        getAllBridges();
+        // Get the device ID using the name to delete the bridge
+        DeviceId deviceId = bridgeIds.get(bridgeName);
+        if (deviceId == null) {
+            log.warn("No bridge with this name, aborting.");
+            throw new BridgeNotFoundException();
+        }
         try {
             Device device = deviceService.getDevice(ovsdbNode.ovsdbId());
             if (device == null) {
@@ -202,13 +206,19 @@ public class AppComponent implements OvsdbBridgeService {
             }
             if (device.is(BridgeConfig.class)) {
 
+                // unregister bridge from its controllers
+                deviceId = DeviceId.deviceId(deviceId.uri());
+                DriverHandler h = driverService.createHandler(deviceId);
+                ControllerConfig controllerConfig = h.behaviour(ControllerConfig.class);
+                controllerConfig.setControllers(new ArrayList<>());
+
+                // remove bridge from onos devices
+                adminService.removeDevice(deviceId);
+
                 // remove bridge from ovsdb
                 BridgeConfig bridgeConfig = device.as(BridgeConfig.class);
                 bridgeConfig.deleteBridge(BridgeName.bridgeName(bridgeName));
                 bridgeIds.remove(bridgeName);
-
-//              // remove bridge from onos devices
-//              adminService.removeDevice(deviceId);
 
                 log.info("Correctly deleted bridge {} at {}", bridgeName, ovsdbAddress);
             } else {
@@ -228,6 +238,13 @@ public class AppComponent implements OvsdbBridgeService {
             throws OvsdbDeviceException, BridgeNotFoundException {
         log.info("Adding port {} to bridge {} at {}", portName, bridgeName, ovsdbAddress);
         OvsdbNode ovsdbNode = new OvsdbNode(ovsdbAddress, OVSPORT);
+
+        // Get all the bridges
+        getAllBridges();
+        if (!isBridgeCreated(bridgeName)) {
+            log.warn("A bridge with this name does not exists, aborting.");
+            throw new BridgeNotFoundException();
+        }
 
         try {
             Device device = deviceService.getDevice(ovsdbNode.ovsdbId());
@@ -261,6 +278,13 @@ public class AppComponent implements OvsdbBridgeService {
         log.warn("Deleting port {} to bridge {} at {}", portName, bridgeName, ovsdbAddress);
         OvsdbNode ovsdbNode = new OvsdbNode(ovsdbAddress, OVSPORT);
 
+        // Get all the bridges
+        getAllBridges();
+        if (!isBridgeCreated(bridgeName)) {
+            log.warn("A bridge with this name does not exists, aborting.");
+            throw new BridgeNotFoundException();
+        }
+
         try {
             Device device = deviceService.getDevice(ovsdbNode.ovsdbId());
             if (device == null) {
@@ -290,11 +314,18 @@ public class AppComponent implements OvsdbBridgeService {
     @Override
     public void createPatchPeerPort(IpAddress ovsdbAddress, String bridgeName,
                                     String portName, String patchPeer)
-            throws OvsdbDeviceException {
+            throws OvsdbDeviceException, BridgeNotFoundException {
 
         log.info("Setting port {} as peer of port {}", portName, patchPeer);
 
         OvsdbNode ovsdbNode = new OvsdbNode(ovsdbAddress, OVSPORT);
+
+        // Get all the bridges
+        getAllBridges();
+        if (!isBridgeCreated(bridgeName)) {
+            log.warn("A bridge with this name does not exists, aborting.");
+            throw new BridgeNotFoundException();
+        }
 
         Device device = deviceService.getDevice(ovsdbNode.ovsdbId());
         log.info("OvsdbNode.ovsdbId = " + ovsdbNode.ovsdbId());
@@ -332,6 +363,13 @@ public class AppComponent implements OvsdbBridgeService {
         log.info("Setting up tunnel VXLAN from {} to {} with key {}",
                 localIp, remoteIp, key);
         OvsdbNode ovsdbNode = new OvsdbNode(ovsdbAddress, OVSPORT);
+
+        // Get all the bridges
+        getAllBridges();
+        if (!isBridgeCreated(bridgeName)) {
+            log.warn("A bridge with this name does not exists, aborting.");
+            throw new BridgeNotFoundException();
+        }
 
         try {
             Device device = deviceService.getDevice(ovsdbNode.ovsdbId());
@@ -376,6 +414,27 @@ public class AppComponent implements OvsdbBridgeService {
     }
 
     /**
+     * Use the deviceService to get all the devices which are Bridges and save this information
+     * in the bridgeIds Map.
+     */
+    private void getAllBridges() {
+        // Clean the bridges variable to avoid write data more than once
+        bridgeIds.clear();
+        Iterable<Device> devices = deviceService.getDevices(Device.Type.CONTROLLER);
+        devices.forEach(device -> {
+            BridgeConfig bridgeConfigDevice = device.as(BridgeConfig.class);
+            Collection<BridgeDescription> setBridges = bridgeConfigDevice.getBridges();
+            setBridges.forEach(bridge -> {
+                if (bridge.deviceId().isPresent()) {
+                    bridgeIds.put(bridge.name(), bridge.deviceId().get());
+                } else {
+                    log.info("There is a problem with the bridges it is not returning ID");
+                }
+            });
+        });
+    }
+
+    /**
      * Checks if the bridge exists and is available.
      *
      * @return true if the bridge is available, false otherwise
@@ -397,9 +456,10 @@ public class AppComponent implements OvsdbBridgeService {
     private DeviceId getNextUniqueDatapathId(AtomicLong datapathId) {
         DeviceId dpid;
         do {
-            String stringId = String.format("%16X", datapathId.getAndIncrement()).replace(' ', '0');
-            log.info("String id is: " + stringId);
+            String stringId = String.format("of:%16X", datapathId.getAndIncrement()).replace(' ', '0');
+            log.info("This is a possible id: {}", stringId);
             dpid = DeviceId.deviceId(stringId);
+
         } while (deviceService.getDevice(dpid) != null);
         return dpid;
     }
