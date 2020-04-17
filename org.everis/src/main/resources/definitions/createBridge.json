@@ -1,0 +1,19 @@
+{
+    "type": "object",
+    "required": [
+        "ovsdb-ip",
+        "bridge-name"
+    ],
+    "properties": {
+        "ovsdb-ip": {
+            "type": "string",
+            "format": "IpAddress",
+            "example": "10.128.15.198"
+        },
+        "bridge-name": {
+            "type": "string",
+            "format": "srt",
+            "example": "br-1"
+        }
+    }
+}
