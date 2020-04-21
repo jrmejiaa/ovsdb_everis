@@ -32,7 +32,7 @@
     <url>http://onosproject.org</url>
 
     <properties>
-        <onos.version>2.2.2</onos.version>
+        <onos.version>1.8.0</onos.version>
         <onos.app.name>org.onosproject.ipfix</onos.app.name>
         <onos.app.origin>ON.Lab</onos.app.origin>
         <onos.app.title>OpenFlow Stats Export App</onos.app.title>
