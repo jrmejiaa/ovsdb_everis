@@ -18,12 +18,11 @@ package org.onosproject.ovsdbrest;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.onlab.packet.IpAddress;
 import org.onlab.util.ItemNotFoundException;
 import org.onosproject.cluster.ClusterService;
@@ -80,38 +79,38 @@ import static org.onosproject.ovsdbrest.OvsdbRestException.OvsdbDeviceException;
 /**
  * Bridge and port controller.
  */
-@Component(immediate = true)
-@Service
+@Component(immediate = true,
+            service = {OvsdbBridgeService.class})
 public class OvsdbBridgeManager implements OvsdbBridgeService {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
     private ApplicationId appId;
     private static final int DPID_BEGIN = 4;
-    private static final int OFPORT = 6653;
+    private static final int OFPORT = 6633;
 
-    @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
-    protected CoreService coreService;
+    @Reference (cardinality = ReferenceCardinality.MANDATORY)
+    private CoreService coreService;
 
-    @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
-    protected DeviceService deviceService;
+    @Reference(cardinality = ReferenceCardinality.MANDATORY)
+    private DeviceService deviceService;
 
-    @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
-    protected ClusterService clusterService;
+    @Reference(cardinality = ReferenceCardinality.MANDATORY)
+    private ClusterService clusterService;
 
-    @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
-    protected NetworkConfigRegistry configRegistry;
+    @Reference(cardinality = ReferenceCardinality.MANDATORY)
+    private NetworkConfigRegistry configRegistry;
 
-    @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
-    protected NetworkConfigService configService;
+    @Reference(cardinality = ReferenceCardinality.MANDATORY)
+    private NetworkConfigService configService;
 
-    @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
-    protected OvsdbController controller;
+    @Reference(cardinality = ReferenceCardinality.MANDATORY)
+    private OvsdbController controller;
 
-    @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
-    protected DeviceAdminService adminService;
+    @Reference(cardinality = ReferenceCardinality.MANDATORY)
+    private DeviceAdminService adminService;
 
-    @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
-    protected DriverService driverService;
+    @Reference(cardinality = ReferenceCardinality.MANDATORY)
+    private DriverService driverService;
 
     private Set<OvsdbNode> ovsdbNodes;
 
@@ -158,7 +157,10 @@ public class OvsdbBridgeManager implements OvsdbBridgeService {
             throws OvsdbDeviceException, BridgeAlreadyExistsException {
 
         OvsdbNode ovsdbNode;
-        log.debug("Creating bridge {} at {}", bridgeName, ovsdbAddress);
+        log.info("Creating bridge {} at {}", bridgeName, ovsdbAddress);
+        readConfiguration();
+        log.info(String.valueOf(ovsdbNodes));
+
         try {
             //  gets the target ovsdb node
             ovsdbNode = ovsdbNodes.stream().filter(node -> node.ovsdbIp().equals(ovsdbAddress)).findFirst().get();
@@ -284,6 +286,7 @@ public class OvsdbBridgeManager implements OvsdbBridgeService {
 
         try {
             Device device = deviceService.getDevice(ovsdbNode.ovsdbId());
+
             log.debug("OvsdbNode.ovsdbId = " + ovsdbNode.ovsdbId());
             if (device == null) {
                 log.warn("Ovsdb device not found, aborting.");
@@ -588,7 +591,7 @@ public class OvsdbBridgeManager implements OvsdbBridgeService {
     private void readConfiguration() {
         OvsdbNodeConfig config = configRegistry.getConfig(appId, OvsdbNodeConfig.class);
         if (config == null) {
-            log.debug("No configuration found");
+            log.info("No configuration found");
             return;
         }
         ovsdbNodes = config.getNodes();

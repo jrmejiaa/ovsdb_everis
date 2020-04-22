@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1586876849297
+Bnd-LastModified: 1586993974804
 Build-Jdk: 11.0.6
 Built-By: jairom
 Bundle-ClassPath: WEB-INF/classes
@@ -11,11 +11,9 @@ Bundle-SymbolicName: org.onosproject.ovsdb-rest
 Bundle-Version: 1.9.0.SNAPSHOT
 Created-By: Apache Maven Bundle Plugin
 Export-Package: org.onosproject.ovsdbrest;uses:="org.onlab.packet,org.on
- osproject.cluster,org.onosproject.core,org.onosproject.net,org.onosproj
- ect.net.config,org.onosproject.net.device,org.onosproject.net.driver,or
- g.onosproject.ovsdb.controller";version="1.9.0",org.onosproject.ovsdbre
- st.rest;uses:="javax.ws.rs,javax.ws.rs.core,org.onlab.rest,org.onosproj
- ect.rest";version="1.9.0"
+ osproject.core,org.onosproject.net,org.onosproject.net.config";version=
+ "1.9.0",org.onosproject.ovsdbrest.rest;uses:="javax.ws.rs,javax.ws.rs.c
+ ore,org.onlab.rest,org.onosproject.rest";version="1.9.0"
 Import-Package: com.fasterxml.jackson.databind;version="[2.10,3)",com.fa
  sterxml.jackson.databind.node;version="[2.10,3)",com.google.common.coll
  ect;version="[22.0,23)",javax.ws.rs;version="[2.0,3)",javax.ws.rs.core;
@@ -26,9 +24,26 @@ Import-Package: com.fasterxml.jackson.databind;version="[2.10,3)",com.fa
  osproject.net.behaviour;version="[2.2,3)",org.onosproject.net.config;ve
  rsion="[2.2,3)",org.onosproject.net.config.basics;version="[2.2,3)",org
  .onosproject.net.device;version="[2.2,3)",org.onosproject.net.driver;ve
- rsion="[2.2,3)",org.onosproject.ovsdb.controller;version="[1.6,2)",org.
+ rsion="[2.2,3)",org.onosproject.ovsdb.controller;version="[2.2,3)",org.
  onosproject.ovsdbrest,org.onosproject.rest;version="[2.2,3)",org.slf4j;
- version="[1.7,2)",org.glassfish.jersey.servlet;version="[2.30,3)"
-Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=11))"
+ version="[1.7,2)",org.glassfish.jersey.servlet;version="[2.27,3)"
+Provide-Capability: osgi.service;objectClass:List<String>="org.onosproje
+ ct.ovsdbrest.OvsdbBridgeService"
+Require-Capability: osgi.service;filter:="(objectClass=org.onosproject.c
+ luster.ClusterService)";effective:=active,osgi.service;filter:="(object
+ Class=org.onosproject.core.CoreService)";effective:=active,osgi.service
+ ;filter:="(objectClass=org.onosproject.net.config.NetworkConfigRegistry
+ )";effective:=active,osgi.service;filter:="(objectClass=org.onosproject
+ .net.config.NetworkConfigService)";effective:=active,osgi.service;filte
+ r:="(objectClass=org.onosproject.net.device.DeviceAdminService)";effect
+ ive:=active,osgi.service;filter:="(objectClass=org.onosproject.net.devi
+ ce.DeviceService)";effective:=active,osgi.service;filter:="(objectClass
+ =org.onosproject.net.driver.DriverService)";effective:=active,osgi.serv
+ ice;filter:="(objectClass=org.onosproject.ovsdb.controller.OvsdbControl
+ ler)";effective:=active,osgi.extender;filter:="(&(osgi.extender=osgi.co
+ mponent)(version>=1.4.0)(!(version>=2.0.0)))",osgi.ee;filter:="(&(osgi.
+ ee=JavaSE)(version=11))"
+Service-Component: OSGI-INF/org.onosproject.ovsdbrest.OvsdbBridgeManager
+ .xml
 Tool: Bnd-4.1.0.201810181252
 Web-ContextPath: /onos/ovsdb

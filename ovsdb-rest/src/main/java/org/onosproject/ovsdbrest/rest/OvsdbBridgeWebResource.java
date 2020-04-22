@@ -62,7 +62,9 @@ public class OvsdbBridgeWebResource extends AbstractWebResource {
                               @PathParam("bridge-name") String bridgeName) {
         try {
             IpAddress ovsdbAddress = IpAddress.valueOf(ovsdbIp);
+            log.info("You are inside of the addBridge Function");
             OvsdbBridgeService ovsdbBridgeService = get(OvsdbBridgeService.class);
+            log.info("The GET Service function works, go to createBridge");
             ovsdbBridgeService.createBridge(ovsdbAddress, bridgeName);
             return Response.status(200).build();
         } catch (OvsdbRestException.BridgeAlreadyExistsException ex) {

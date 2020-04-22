@@ -24,7 +24,7 @@
         <relativePath/><!-- parent is remote -->
     </parent>
 
-    <artifactId>onos-app-ipfix</artifactId>
+    <artifactId>ipfix</artifactId>
     <version>1.9.0-SNAPSHOT</version>
     <packaging>bundle</packaging>
 
