@@ -107,7 +107,6 @@ public class AppComponent implements OvsdbBridgeService {
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
     private DriverService driverService;
 
-    private ApplicationId appId;
     private static final int DPID_BEGIN = 4;
     private static final int OFPORT = 6633;
     private static final TpPort OVSPORT = TpPort.tpPort(6640);
@@ -126,11 +125,6 @@ public class AppComponent implements OvsdbBridgeService {
     protected void deactivate() {
         cfgService.unregisterProperties(getClass(), false);
         log.info("Stopped");
-    }
-
-    @Modified
-    public void modified(ComponentContext context) {
-        log.info("Reconfigured");
     }
 
     @Override
