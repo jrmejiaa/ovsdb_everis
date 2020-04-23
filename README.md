@@ -1,4 +1,4 @@
-# ESP8266 Driver to STM32 with UART Interruptions
+# EVERIS Apps 
 
 ## Getting Started
 
