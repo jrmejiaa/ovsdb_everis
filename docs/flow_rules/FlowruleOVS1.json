@@ -1,0 +1,166 @@
+{
+  "flows": [{
+      "tableId": 0,
+      "priority": 60000,
+      "isPermanent": true,
+      "deviceId": "of:0000005000000102",
+      "treatment": {
+        "instructions": [{
+            "type": "L2MODIFICATION",
+            "subtype": "TUNNEL_ID",
+            "tunnelId": 100
+          },
+          {
+            "type": "TABLE",
+            "tableId": 1
+          }
+        ]
+      },
+      "selector": {
+        "criteria": [{
+          "type": "IN_PORT",
+          "port": "3"
+        }]
+      }
+    },
+    {
+      "tableId": 0,
+      "priority": 60000,
+      "isPermanent": true,
+      "deviceId": "of:0000005000000102",
+      "treatment": {
+        "instructions": [{
+            "type": "L2MODIFICATION",
+            "subtype": "TUNNEL_ID",
+            "tunnelId": 200
+          },
+          {
+            "type": "TABLE",
+            "tableId": 1
+          }
+        ]
+      },
+      "selector": {
+        "criteria": [{
+          "type": "IN_PORT",
+          "port": "4"
+        }]
+      }
+    },
+    {
+      "tableId": 0,
+      "priority": 100,
+      "isPermanent": true,
+      "deviceId": "of:0000005000000102",
+      "treatment": {
+        "instructions": [{
+          "type": "TABLE",
+          "tableId": 1
+        }]
+      }
+    },
+    {
+      "tableId": 1,
+      "priority": 60000,
+      "isPermanent": true,
+      "deviceId": "of:0000005000000102",
+      "treatment": {
+        "instructions": [{
+          "type": "OUTPUT",
+          "port": 3
+        }]
+      },
+      "selector": {
+        "criteria": [{
+            "type": "TUNNEL_ID",
+            "tunnelId": 100
+          },
+          {
+            "type": "ETH_DST",
+            "mac": "00:50:79:66:68:05"
+          }
+        ]
+      }
+    },
+    {
+      "tableId": 1,
+      "priority": 60000,
+      "isPermanent": true,
+      "deviceId": "of:0000005000000102",
+      "treatment": {
+        "instructions": [{
+          "type": "OUTPUT",
+          "port": 4
+        }]
+      },
+      "selector": {
+        "criteria": [{
+            "type": "TUNNEL_ID",
+            "tunnelId": 200
+          },
+          {
+            "type": "ETH_DST",
+            "mac": "00:50:79:66:68:06"
+          }
+        ]
+      }
+    },
+    {
+      "tableId": 1,
+      "priority": 60000,
+      "isPermanent": true,
+      "deviceId": "of:0000005000000102",
+      "treatment": {
+        "instructions": [{
+          "type": "OUTPUT",
+          "port": 6
+        }]
+      },
+      "selector": {
+        "criteria": [{
+            "type": "TUNNEL_ID",
+            "tunnelId": 100
+          },
+          {
+            "type": "ETH_DST",
+            "mac": "00:50:79:66:68:03"
+          }
+        ]
+      }
+    },
+    {
+      "tableId": 1,
+      "priority": 60000,
+      "isPermanent": true,
+      "deviceId": "of:0000005000000102",
+      "treatment": {
+        "instructions": [{
+          "type": "OUTPUT",
+          "port": 6
+        }]
+      },
+      "selector": {
+        "criteria": [{
+            "type": "TUNNEL_ID",
+            "tunnelId": 200
+          },
+          {
+            "type": "ETH_DST",
+            "mac": "00:50:79:66:68:04"
+          }
+        ]
+      }
+    },
+    {
+      "tableId": 1,
+      "priority": 100,
+      "isPermanent": true,
+      "deviceId": "of:0000005000000102",
+      "treatment": {
+        "instructions": [{
+          "type": "NOACTION"
+        }]
+      }
+    }
+  ]
+}
