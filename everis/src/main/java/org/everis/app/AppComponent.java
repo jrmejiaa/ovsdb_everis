@@ -112,6 +112,9 @@ public class AppComponent implements OvsdbBridgeService {
     // {bridgeName: datapathId} structure to manage the creation/deletion of bridges
     private Map<String, DeviceId> bridgeIds = Maps.newConcurrentMap();
 
+    public AppComponent() {
+    }
+
     @Activate
     protected void activate() {
         cfgService.registerProperties(getClass());
