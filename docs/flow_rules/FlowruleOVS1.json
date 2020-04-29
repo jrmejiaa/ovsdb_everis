@@ -22,7 +22,7 @@
         "criteria": [
           {
             "type": "IN_PORT",
-            "port": "3"
+            "port": 1
           }
         ]
       }
@@ -49,7 +49,7 @@
         "criteria": [
           {
             "type": "IN_PORT",
-            "port": "4"
+            "port": 2
           }
         ]
       }
@@ -77,7 +77,7 @@
         "instructions": [
           {
             "type": "OUTPUT",
-            "port": 3
+            "port": 1
           }
         ]
       },
@@ -103,7 +103,7 @@
         "instructions": [
           {
             "type": "OUTPUT",
-            "port": 4
+            "port": 2
           }
         ]
       },
@@ -129,7 +129,7 @@
         "instructions": [
           {
             "type": "OUTPUT",
-            "port": 6
+            "port": 3
           }
         ]
       },
@@ -155,7 +155,7 @@
         "instructions": [
           {
             "type": "OUTPUT",
-            "port": 6
+            "port": 3
           }
         ]
       },
@@ -181,6 +181,114 @@
         "instructions": [
           {
             "type": "NOACTION"
+          }
+        ]
+      }
+    },
+    {
+      "tableId": 1,
+      "priority": 60000,
+      "isPermanent": true,
+      "deviceId": "of:0000005000000202",
+      "treatment": {
+        "instructions": [{
+          "type": "OUTPUT",
+          "port": 1
+        }]
+      },
+      "selector": {
+        "criteria": [{
+            "type": "TUNNEL_ID",
+            "tunnelId": 100
+          },
+          {
+            "type": "ETH_TYPE",
+            "ethType": "0x0806"
+          },
+          {
+            "type": "ARP_TPA",
+            "ip": "172.64.0.1"
+          }
+        ]
+      }
+    },
+    {
+      "tableId": 1,
+      "priority": 60000,
+      "isPermanent": true,
+      "deviceId": "of:0000005000000202",
+      "treatment": {
+        "instructions": [{
+          "type": "OUTPUT",
+          "port": 2
+        }]
+      },
+      "selector": {
+        "criteria": [{
+            "type": "TUNNEL_ID",
+            "tunnelId": 200
+          },
+          {
+            "type": "ETH_TYPE",
+            "ethType": "0x0806"
+          },
+          {
+            "type": "ARP_TPA",
+            "ip": "172.64.0.3"
+          }
+        ]
+      }
+    },
+    {
+      "tableId": 1,
+      "priority": 60000,
+      "isPermanent": true,
+      "deviceId": "of:0000005000000202",
+      "treatment": {
+        "instructions": [{
+          "type": "OUTPUT",
+          "port": 3
+        }]
+      },
+      "selector": {
+        "criteria": [{
+            "type": "TUNNEL_ID",
+            "tunnelId": 100
+          },
+          {
+            "type": "ETH_TYPE",
+            "ethType": "0x0806"
+          },
+          {
+            "type": "ARP_TPA",
+            "ip": "172.64.0.2"
+          }
+        ]
+      }
+    },
+    {
+      "tableId": 1,
+      "priority": 60000,
+      "isPermanent": true,
+      "deviceId": "of:0000005000000202",
+      "treatment": {
+        "instructions": [{
+          "type": "OUTPUT",
+          "port": 3
+        }]
+      },
+      "selector": {
+        "criteria": [{
+            "type": "TUNNEL_ID",
+            "tunnelId": 200
+          },
+          {
+            "type": "ETH_TYPE",
+            "ethType": "0x0806"
+          },
+          {
+            "type": "ARP_TPA",
+            "ip": "172.64.0.4"
           }
         ]
       }
