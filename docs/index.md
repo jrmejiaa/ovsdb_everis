@@ -43,8 +43,8 @@ If you want to make some changes in the code or you want to debug something. We 
 ## Deployment
 The deployment of both apps are found in the Wiki of this repository. Please go to the next links to see how you can work with every app in an ONOS environment. 
 
-- Deployment [everis.IPFix](https://github.com/jrmejiaa/everis_app/wiki/Deployment-everis.IPFix)
-- Deployment [everis.ovsdb-rest](https://github.com/jrmejiaa/everis_app/wiki/Deployment-everis.ovsdb-rest)
+- Deployment [everis.IPFix](Deployment-everis.IPFix)
+- Deployment [everis.ovsdb-rest](Deployment-everis.ovsdb-rest)
 
 ## Authors
 
