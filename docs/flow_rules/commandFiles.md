@@ -16,7 +16,6 @@ ip addr flush dev ens4
 ip addr add 192.168.10.1/24 dev ens4
 ip link set ens4 up
 ip route add 192.168.10.0/24 via 192.168.10.5
-
 ## Primera Interfaz OVS 2
 ip addr add 192.168.20.1/24 dev ens3
 ip link set ens3 up
@@ -74,39 +73,23 @@ sudo ovs-vsctl add-port br0 vxlan1 -- set interface vxlan1 type=vxlan options:re
 
 Information using the `sudo ovs-ofctl show br-1`
 
-* ens4: 6
-* ens5: 3
-* ens6: 4
+* ens5: 3 - 1
+* ens6: 4 - 2
+* ens4: 6 - 3
 
 ```bash
 #New Version
-table=0,in_port=3,actions=set_field:100->tun_id,resubmit(,1) #281478658103404
-table=0,in_port=4,actions=set_field:200->tun_id,resubmit(,1) #281478918241054
+table=0,in_port=1,actions=set_field:100->tun_id,resubmit(,1)
+table=0,in_port=2,actions=set_field:200->tun_id,resubmit(,1) 
 table=0, actions=resubmit(,1)
-#281478693229640
-table=1,tun_id=100,eth_dst=00:50:79:66:68:05,actions=output:3 #281476851398593
-table=1,tun_id=200,eth_dst=00:50:79:66:68:06,actions=output:4 #281477833129373
-table=1,tun_id=100,eth_dst=00:50:79:66:68:03,actions=output:6 #281478753381088
-table=1,tun_id=200,eth_dst=00:50:79:66:68:04,actions=output:6 #281476547375381
-table=1,tun_id=100,eth_type=0x0806,arp_tpa=172.64.0.1,actions=output:3
-table=1,tun_id=200,eth_type=0x0806,arp_tpa=172.64.0.3,actions=output:4
-table=1,tun_id=100,eth_type=0x0806,arp_tpa=172.64.0.2,actions=output:6
-table=1,tun_id=200,eth_type=0x0806,arp_tpa=172.64.0.4,actions=output:6
-table=1,priority=100,actions=drop
-#281476103729636
-
-#Old Version
-table=0,in_port=3,actions=set_field:100->tun_id,resubmit(,1)
-table=0,in_port=4,actions=set_field:200->tun_id,resubmit(,1)
-table=0, actions=resubmit(,1)
-table=1,tun_id=100,dl_dst=00:50:79:66:68:05,actions=output:3
-table=1,tun_id=200,dl_dst=00:50:79:66:68:06,actions=output:4
-table=1,tun_id=100,dl_dst=00:50:79:66:68:03,actions=output:6
-table=1,tun_id=200,dl_dst=00:50:79:66:68:04,actions=output:6
-table=1,tun_id=100,arp,nw_dst=172.64.0.1,actions=output:3
-table=1,tun_id=200,arp,nw_dst=172.64.0.3,actions=output:4
-table=1,tun_id=100,arp,nw_dst=172.64.0.2,actions=output:6
-table=1,tun_id=200,arp,nw_dst=172.64.0.4,actions=output:6
+table=1,tun_id=100,eth_dst=00:50:79:66:68:05,actions=output:1
+table=1,tun_id=200,eth_dst=00:50:79:66:68:06,actions=output:2
+table=1,tun_id=100,eth_dst=00:50:79:66:68:03,actions=output:3
+table=1,tun_id=200,eth_dst=00:50:79:66:68:04,actions=output:3
+table=1,tun_id=100,eth_type=0x0806,arp_tpa=172.64.0.1,actions=output:1
+table=1,tun_id=200,eth_type=0x0806,arp_tpa=172.64.0.3,actions=output:2
+table=1,tun_id=100,eth_type=0x0806,arp_tpa=172.64.0.2,actions=output:3
+table=1,tun_id=200,eth_type=0x0806,arp_tpa=172.64.0.4,actions=output:3
 table=1,priority=100,actions=drop
 ```
 
@@ -114,38 +97,23 @@ table=1,priority=100,actions=drop
 
 Information using the `sudo ovs-ofctl show br-1`
 
-* ens4: 5
-* ens5: 3
-* ens6: 2
+* ens5: 3 - 1
+* ens6: 2 - 2
+* ens4: 5 - 3
 
 ```bash
 #New Version
-table=0,in_port=3,actions=set_field:100->tun_id,resubmit(,1)#281478593351756
-table=0,in_port=2,actions=set_field:200->tun_id,resubmit(,1) #281476953122511
-table=0, actions=resubmit(,1)
-#281477189538230
-table=1,tun_id=100,eth_dst=00:50:79:66:68:03,actions=output:3 #281477976136367
-table=1,tun_id=200,eth_dst=00:50:79:66:68:04,actions=output:2 #281478476854409
-table=1,tun_id=100,eth_dst=00:50:79:66:68:05,actions=output:5 #281477062007166
-table=1,tun_id=200,eth_dst=00:50:79:66:68:06,actions=output:5 #281478580891175
-table=1,tun_id=100,eth_type=0x0806,arp_tpa=172.64.0.2,actions=output:3
-table=1,tun_id=200,eth_type=0x0806,arp_tpa=172.64.0.4,actions=output:2
-table=1,tun_id=100,eth_type=0x0806,arp_tpa=172.64.0.1,actions=output:5
-table=1,tun_id=200,eth_type=0x0806,arp_tpa=172.64.0.3,actions=output:5
-table=1,priority=100,actions=drop
-#281477753240997
-
-#Old Version
-table=0,in_port=3,actions=set_field:100->tun_id,resubmit(,1)
+table=0,in_port=1,actions=set_field:100->tun_id,resubmit(,1)
 table=0,in_port=2,actions=set_field:200->tun_id,resubmit(,1)
 table=0, actions=resubmit(,1)
-table=1,tun_id=100,dl_dst=00:50:79:66:68:03,actions=output:3
-table=1,tun_id=200,dl_dst=00:50:79:66:68:04,actions=output:2
-table=1,tun_id=100,dl_dst=00:50:79:66:68:05,actions=output:5
-table=1,tun_id=200,dl_dst=00:50:79:66:68:06,actions=output:5
-table=1,tun_id=100,arp,nw_dst=172.64.0.2,actions=output:3
-table=1,tun_id=200,arp,nw_dst=172.64.0.4,actions=output:2
-table=1,tun_id=100,arp,nw_dst=172.64.0.1,actions=output:5
-table=1,tun_id=200,arp,nw_dst=172.64.0.3,actions=output:5
+table=1,tun_id=100,eth_dst=00:50:79:66:68:03,actions=output:1
+table=1,tun_id=200,eth_dst=00:50:79:66:68:04,actions=output:2
+table=1,tun_id=100,eth_dst=00:50:79:66:68:05,actions=output:3
+table=1,tun_id=200,eth_dst=00:50:79:66:68:06,actions=output:3
+table=1,tun_id=100,eth_type=0x0806,arp_tpa=172.64.0.2,actions=output:1
+table=1,tun_id=200,eth_type=0x0806,arp_tpa=172.64.0.4,actions=output:2
+table=1,tun_id=100,eth_type=0x0806,arp_tpa=172.64.0.1,actions=output:3
+table=1,tun_id=200,eth_type=0x0806,arp_tpa=172.64.0.3,actions=output:3
 table=1,priority=100,actions=drop
 ```
+

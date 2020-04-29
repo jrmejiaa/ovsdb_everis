@@ -1,0 +1,12 @@
+echo "Start with root permission"
+# OVS 2
+ip addr flush dev ens3
+ip addr add 10.235.0.20/20 dev ens3
+ip route add default via 10.235.0.2
+# OVS 2 Commands to make the connection
+## Conectar el manager a ONOS (IP=10.128.0.4)
+ovs-vsctl set-manager tcp:10.128.0.4:6640
+## Crear la conexion con el router
+ip addr flush dev ens4
+ip addr add 192.168.20.5/24 dev ens4
+ip route add 192.168.10.0/24 via 192.168.20.1
