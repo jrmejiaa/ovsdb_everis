@@ -2,7 +2,7 @@
 
 This app was created to work directly with REST API, therefore it is the **only** way to make the changes in the manager device. The Everis OVSDB REST works with the [Swagger Documentation](https://wiki.onosproject.org/display/ONOS/Generating+Swagger+documentation+for+the+REST+API) of ONOS, to make the test that we want to achieve, we are going to work directly in the Swagger Documentation of the ONOS machine were the app was uploaded. The IP address should be something like this `http://<ONOS_IP>:8181/onos/v1/docs`.
 
-![Swagger Main Page](https://github.com/jrmejiaa/everis_app/blob/master/docs/img/SwaggerDoc.png)
+![Swagger Main Page](img/SwaggerDoc.png)
 
 You need a device manager to work with this app. It is necessary that a OpenvSwitch system set the manager using the ONOS IP and the OVSDB port (6640). You can use the same machine as ONOS and `Mininet`, but it has its limitations, the OVS Command to to this is
 
