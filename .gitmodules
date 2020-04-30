@@ -1,0 +1,3 @@
+[submodule "docs/wikiDocs"]
+	path = docs/wikiDocs
+	url = https://github.com/jrmejiaa/everis_app.wiki.git
