@@ -13,7 +13,7 @@ sudo ovs-vsctl set-manager tcp:192.168.0.100:6640
 
 Once you have set the manager in the OVS Machine, you should see the manager in the ONOS Topology interface GUI (or onos-cli) as the next image and with a similar `deviceID`.
 
-![Manager OVS with deviceID](https://github.com/jrmejiaa/everis_app/blob/master/docs/img/manager-ovs.png)
+![Manager OVS with deviceID](img/manager-ovs.png)
 
 The swagger documentation has the JSON that you need to send to use the different POST that we have developed to manage the switches in the manager device that you have added. To create a Bridge for example the structure is shown below.
 
