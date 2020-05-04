@@ -1,17 +1,26 @@
 "Start with root permission"
 # Start Access ip 
-ip addr flush dev ens5
-ip addr add 10.235.0.5/20 dev ens5
-ip link set ens5 up
+ip addr flush dev ens3
+ip addr add 10.235.0.5/20 dev ens3
+ip link set ens3 up
 # Delete data ips
 ip addr flush dev ens3
 ip addr flush dev ens4
+
 ## Primera Interfaz OVS 1
 ip addr add 192.168.10.1/24 dev ens4
 ip link set ens4 up
 ip route add 192.168.10.0/24 via 192.168.10.5
 
+sudo ip addr add 192.168.30.1/24 dev ens6
+sudo ip link set ens6 up
+sudo ip route add 192.168.30.0/24 via 192.168.30.5
+
 ## Primera Interfaz OVS 2
-ip addr add 192.168.20.1/24 dev ens3
-ip link set ens3 up
+ip addr add 192.168.20.1/24 dev ens4
+ip link set ens4 up
 ip route add 192.168.20.0/24 via 192.168.20.5
+
+sudo ip addr add 192.168.40.1/24 dev ens7
+sudo ip link set ens7 up
+sudo ip route add 192.168.40.0/24 via 192.168.40.5

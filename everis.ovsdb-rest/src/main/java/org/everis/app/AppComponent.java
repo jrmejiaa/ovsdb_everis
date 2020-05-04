@@ -18,8 +18,8 @@ package org.everis.app;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.onlab.packet.TpPort;
-    import org.onlab.util.ItemNotFoundException;
-    import org.onosproject.net.Device;
+import org.onlab.util.ItemNotFoundException;
+import org.onosproject.net.Device;
 import org.onosproject.net.DeviceId;
 import org.onosproject.net.behaviour.BridgeName;
 import org.onosproject.net.behaviour.BridgeConfig;
@@ -62,8 +62,6 @@ import org.everis.app.OvsdbNodeConfig.OvsdbNode;
 import org.everis.app.OvsdbRestException.BridgeNotFoundException;
 import org.everis.app.OvsdbRestException.BridgeAlreadyExistsException;
 import org.everis.app.OvsdbRestException.OvsdbDeviceException;
-
-//import static org.onlab.util.Tools.get;
 
 /**
  * Skeletal ONOS application component.

@@ -14,10 +14,10 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<features xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" name="everis-1.0">
-    <feature name="everis" version="1.0"
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" name="everis.ovsdb-rest-1.0">
+    <feature name="everis.ovsdb-rest" version="1.0"
              description="ONOS REST API bundle archetype">
         <feature>onos-api</feature>
-        <bundle>mvn:everis/everis/1.0</bundle>
+        <bundle>mvn:everis.ovsdb-rest/everis.ovsdb-rest/1.0</bundle>
     </feature>
 </features>

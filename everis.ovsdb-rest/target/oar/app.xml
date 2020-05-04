@@ -14,10 +14,10 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<app name="org.everis.app" origin="ON.Lab" version="1.0"
-        title="org.everis.app" category="default" url="http://onosproject.org"
-        featuresRepo="mvn:everis/everis/1.0/xml/features"
-        features="everis" apps="org.onosproject.ovsdb-base,org.onosproject.drivers.ovsdb,org.onosproject.openflow-base,org.onosproject.openflow">
+<app name="everis.ovsdb-rest" origin="ON.Lab" version="1.0"
+        title="everis.ovsdb-rest" category="default" url="http://onosproject.org"
+        featuresRepo="mvn:everis.ovsdb-rest/everis.ovsdb-rest/1.0/xml/features"
+        features="everis.ovsdb-rest" apps="org.onosproject.ovsdb-base,org.onosproject.drivers.ovsdb,org.onosproject.openflow-base,org.onosproject.openflow,org.onosproject.fwd">
     <description>ONOS REST API bundle archetype</description>
-    <artifact>mvn:everis/everis/1.0</artifact>
+    <artifact>mvn:everis.ovsdb-rest/everis.ovsdb-rest/1.0</artifact>
 </app>
