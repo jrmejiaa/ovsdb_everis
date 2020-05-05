@@ -35,7 +35,7 @@
 
     <properties>
         <onos.app.name>everis.ovsdb-rest</onos.app.name>
-        <web.context>https://github.com/jrmejiaa/everis_app/wiki</web.context>
+        <web.context>/onos/everis.ovsdb-rest</web.context>
         <api.version>1.0.0</api.version>
         <api.title>EVERIS-OVSDB</api.title>
         <onos.app.requires>

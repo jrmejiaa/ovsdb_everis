@@ -116,13 +116,11 @@ public class AppComponent implements OvsdbBridgeService {
     @Activate
     protected void activate() {
         cfgService.registerProperties(getClass());
-        log.info("Hello World the App is working...");
     }
 
     @Deactivate
     protected void deactivate() {
         cfgService.unregisterProperties(getClass(), false);
-        log.info("Stopped");
     }
 
     @Override
