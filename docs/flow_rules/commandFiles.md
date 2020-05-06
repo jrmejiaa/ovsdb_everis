@@ -79,7 +79,7 @@ Information using the `sudo ovs-ofctl show br-1`
 * vxlan2:   4 - Internet/LTE
 
 Host1: 00:50:79:66:68:04 id 100 172.64.0.1
-Host2: 00:50:79:66:68:05 id 200 172.64.0.3
+Host2: 00:50:79:66:68:0a id 200 172.64.0.3
 Host3: 00:50:79:66:68:06 id 100 172.64.0.2
 Host4: 00:50:79:66:68:07 id 200 172.64.0.4
 
@@ -89,7 +89,7 @@ table=0,in_port=1,actions=set_field:100->tun_id,resubmit(,1)
 table=0,in_port=2,actions=set_field:200->tun_id,resubmit(,1) 
 table=0, actions=resubmit(,1)
 table=1,tun_id=100,eth_dst=00:50:79:66:68:04,actions=output:1
-table=1,tun_id=200,eth_dst=00:50:79:66:68:05,actions=output:2
+table=1,tun_id=200,eth_dst=00:50:79:66:68:0a,actions=output:2
 table=1,tun_id=100,eth_dst=00:50:79:66:68:06,actions=output:3
 table=1,tun_id=200,eth_dst=00:50:79:66:68:07,actions=output:3
 table=1,tun_id=100,eth_dst=00:50:79:66:68:06,actions=output:4 #LowPriority
@@ -114,7 +114,7 @@ Information using the `sudo ovs-ofctl show br-1`
 * vxlan2:   4
 
 Host1: 00:50:79:66:68:04 id 100 172.64.0.1
-Host2: 00:50:79:66:68:05 id 200 172.64.0.3
+Host2: 00:50:79:66:68:0a id 200 172.64.0.3
 Host3: 00:50:79:66:68:06 id 100 172.64.0.2
 Host4: 00:50:79:66:68:07 id 200 172.64.0.4
 
@@ -126,9 +126,9 @@ table=0, actions=resubmit(,1)
 table=1,tun_id=100,eth_dst=00:50:79:66:68:06,actions=output:1
 table=1,tun_id=200,eth_dst=00:50:79:66:68:07,actions=output:2
 table=1,tun_id=100,eth_dst=00:50:79:66:68:04,actions=output:3
-table=1,tun_id=200,eth_dst=00:50:79:66:68:05,actions=output:3
+table=1,tun_id=200,eth_dst=00:50:79:66:68:0a,actions=output:3
 table=1,tun_id=100,eth_dst=00:50:79:66:68:04,actions=output:4 #LowPriority
-table=1,tun_id=200,eth_dst=00:50:79:66:68:05,actions=output:4 #LowPriority
+table=1,tun_id=200,eth_dst=00:50:79:66:68:0a,actions=output:4 #LowPriority
 table=1,tun_id=100,eth_type=0x0806,arp_tpa=172.64.0.2,actions=output:1
 table=1,tun_id=200,eth_type=0x0806,arp_tpa=172.64.0.4,actions=output:2
 table=1,tun_id=100,eth_type=0x0806,arp_tpa=172.64.0.1,actions=output:3
