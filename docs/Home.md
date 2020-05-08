@@ -14,6 +14,7 @@ This app is used to manage the bridges and its characteristic using OpenVSwitch 
 - Delete a port to an existing bridge.
 - Create a VXLAN Tunnel to an existing bridge.
 - Create a Patch peer port to an existing bridge.
+- Create a Path Intent to set a VXLAN as a Primary, Backup or Fail-Over
 
 Those actions are made using REST API in every case. There is a chance to use this app also to create other types of tunnels. However, it was not the purpose of the project, therefore we cannot work in this possibility. If you want you can fork this project to create those extra features to the app.
 
