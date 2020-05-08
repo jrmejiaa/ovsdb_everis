@@ -14,6 +14,7 @@ This app is used to manage the bridges and its characteristic using OpenVSwitch 
 - Delete a port to an existing bridge.
 - Create a VXLAN Tunnel to an existing bridge.
 - Create a Patch peer port to an existing bridge.
+- Create a Path Intent to set a VXLAN as a Primary, Backup or Failover
 
 Those actions are made using REST API in every case. There is a chance to use this app also to create other types of tunnels. However, it was not the purpose of the project, therefore we cannot work in this possibility. If you want you can fork this project to create those extra features to the app.
 
@@ -44,7 +45,7 @@ If you want to make some changes in the code or you want to debug something. We 
 The deployment of both apps are found in the Wiki of this repository. Please go to the next links to see how you can work with every app in an ONOS environment. 
 
 - Deployment [everis.IPFix](Deployment-everis.IPFix)
-- Deployment [everis.ovsdb-rest](Deployment-everis.ovsdb-rest)
+- Deployment [everis.ovsdb-rest](https://github.com/jrmejiaa/everis_app/wiki/Deployment-everis.ovsdb-rest)
 
 ## Authors
 
