@@ -32,7 +32,19 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Installing
 
+The installation process of both apps is highly based in a skeleton `onos-app`. That's why even when the last version of ONOS use `Bazel` as the main compiler, the skeleton app use `Maven` to compile the file and create the file `*.oar`, which can be uploaded to the ONOS machine. On both folders you are going to find a `pom.xml` file which is used to compile the project. If you have installed `Maven` in your machine [here](https://maven.apache.org/install.html) you just need to compile the `pom.xml` file with the next command. 
+
+```bash
+# You should be in the root of one of the apps
+mvn clean install
+```
+If you want to make some changes in the code or you want to debug something. We recommend that you use Intellij IDEA to make this process. ONOS has some documentation about how you should use this IDE to make those process. However, both files has its last `*oar` file ready to use. You can find this in `<APP>/target/*.oar` and it can be used the GUI ONOS interface to install the app in the Applications part. The app is going to install all the core apps that it needs to make a successful installation.
+
 ## Deployment
+The deployment of both apps are found in the Wiki of this repository. Please go to the next links to see how you can work with every app in an ONOS environment. 
+
+- Deployment [everis.IPFix](Deployment-everis.IPFix)
+- Deployment [everis.ovsdb-rest](Deployment-everis.ovsdb-rest)
 
 ## Authors
 
