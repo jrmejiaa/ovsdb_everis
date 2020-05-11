@@ -52,6 +52,7 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.onosproject.cfg.ComponentConfigService;
 import org.onosproject.cluster.ClusterService;
@@ -134,13 +135,18 @@ public class AppComponent implements OvsdbBridgeService {
     @Activate
     protected void activate() {
         cfgService.registerProperties(getClass());
-        // log.info("The App was successfully activated");
+        log.info("The App was successfully activated");
     }
 
     @Deactivate
     protected void deactivate() {
         cfgService.unregisterProperties(getClass(), false);
-        // log.info("The App was successfully deactivated");
+        log.info("The App was successfully deactivated");
+    }
+
+    @Modified
+    public void modified() {
+        log.info("Reconfigured");
     }
 
     @Override
