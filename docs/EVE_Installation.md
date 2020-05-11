@@ -48,11 +48,11 @@ Dentro de la máquina en EVE-NG OpenvSwitch_1 se hacen los siguientes cambios
 sudo ifconfig ens3 10.235.0.10/20
 ```
 
-- Dentro de Google Shell se tiene que poner la ruta de esta forma para que todo se redirija a ONOS `(IP=10.128.0.4)`
+- Dentro de Google Shell se tiene que poner la ruta de esta forma para que todo se redirija a EVE `(IP=10.128.0.10)`
 
 ```bash
 gcloud compute routes create eve1 \
     --destination-range=10.235.0.0/20 \
     --network=default \
-    --next-hop-address=10.128.0.4
+    --next-hop-address=10.128.0.10
 ```
