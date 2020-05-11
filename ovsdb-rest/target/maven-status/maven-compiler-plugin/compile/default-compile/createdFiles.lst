@@ -6,8 +6,8 @@ org/onosproject/ovsdbrest/OvsdbNodeConfig$OvsdbNode.class
 org/onosproject/ovsdbrest/OvsdbBridgeManager$InternalConfigListener.class
 org/onosproject/ovsdbrest/OvsdbRestException.class
 org/onosproject/ovsdbrest/OvsdbBridgeManager$2.class
-org/onosproject/ovsdbrest/ConnectionHandler.class
 org/onosproject/ovsdbrest/OvsdbBridgeService.class
+org/onosproject/ovsdbrest/ConnectionHandler.class
 org/onosproject/ovsdbrest/OvsdbBridgeManager.class
 org/onosproject/ovsdbrest/OvsdbBridgeManager$1.class
 org/onosproject/ovsdbrest/OvsdbRestException$BridgeNotFoundException.class

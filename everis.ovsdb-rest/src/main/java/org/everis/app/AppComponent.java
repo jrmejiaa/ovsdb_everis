@@ -17,10 +17,20 @@ package org.everis.app;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.onlab.packet.IpAddress;
 import org.onlab.packet.TpPort;
-    import org.onlab.util.ItemNotFoundException;
-    import org.onosproject.net.Device;
+import org.onlab.packet.Ethernet;
+import org.onlab.util.ItemNotFoundException;
+import org.onosproject.net.Device;
 import org.onosproject.net.DeviceId;
+import org.onosproject.net.Path;
+import org.onosproject.net.Link;
+import org.onosproject.cli.AbstractShellCommand;
+import org.onosproject.net.flow.DefaultTrafficSelector;
+import org.onosproject.net.flow.TrafficSelector;
+import org.onosproject.net.intent.Intent;
+import org.onosproject.net.topology.Topology;
+import org.onosproject.net.topology.TopologyService;
 import org.onosproject.net.behaviour.BridgeName;
 import org.onosproject.net.behaviour.BridgeConfig;
 import org.onosproject.net.behaviour.BridgeDescription;
@@ -35,12 +45,15 @@ import org.onosproject.net.behaviour.DefaultPatchDescription;
 import org.onosproject.net.behaviour.PatchDescription;
 import org.onosproject.net.behaviour.InterfaceConfig;
 import org.onosproject.net.driver.DriverHandler;
+import org.onosproject.net.intent.IntentService;
+import org.onosproject.net.intent.PathIntent;
+import org.onosproject.net.provider.ProviderId;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.onlab.packet.IpAddress;
 import org.onosproject.cfg.ComponentConfigService;
 import org.onosproject.cluster.ClusterService;
 import org.onosproject.core.CoreService;
@@ -52,10 +65,12 @@ import org.onosproject.ovsdb.controller.OvsdbController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Set;
+import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.everis.app.OvsdbNodeConfig.OvsdbNode;
@@ -63,7 +78,7 @@ import org.everis.app.OvsdbRestException.BridgeNotFoundException;
 import org.everis.app.OvsdbRestException.BridgeAlreadyExistsException;
 import org.everis.app.OvsdbRestException.OvsdbDeviceException;
 
-//import static org.onlab.util.Tools.get;
+import static org.onosproject.net.DeviceId.deviceId;
 
 /**
  * Skeletal ONOS application component.
@@ -108,6 +123,8 @@ public class AppComponent implements OvsdbBridgeService {
     private static final int OFPORT = 6633;
     private static final TpPort OVSPORT = TpPort.tpPort(6640);
     private final AtomicLong datapathId = new AtomicLong(DPID_BEGIN);
+    private static final ProviderId PROVIDER_ID = new ProviderId("AppComponent",
+            "org.onosproject.net.intent");
 
     // {bridgeName: datapathId} structure to manage the creation/deletion of bridges
     private Map<String, DeviceId> bridgeIds = Maps.newConcurrentMap();
@@ -118,13 +135,18 @@ public class AppComponent implements OvsdbBridgeService {
     @Activate
     protected void activate() {
         cfgService.registerProperties(getClass());
-        log.info("Hello World the App is working...");
+        log.info("The App was successfully activated");
     }
 
     @Deactivate
     protected void deactivate() {
         cfgService.unregisterProperties(getClass(), false);
-        log.info("Stopped");
+        log.info("The App was successfully deactivated");
+    }
+
+    @Modified
+    public void modified() {
+        log.info("Reconfigured");
     }
 
     @Override
@@ -402,6 +424,69 @@ public class AppComponent implements OvsdbBridgeService {
     public void deleteGreTunnel(IpAddress ovsdbAddress, String bridgeName, String portName)
             throws OvsdbDeviceException {
 
+    }
+
+    @Override
+    public void createPathIntent(String srcId, String dstId, String portSrc, String portDst,
+                                 PathIntent.ProtectionType setType)
+            throws Exception {
+        log.info("Start the createPathIntent function");
+        IntentService intentService = AbstractShellCommand.get(IntentService.class);
+        log.info("Start TrafficSelector");
+        // Set Variables to make the builder
+        TrafficSelector selector = DefaultTrafficSelector.builder()
+                .matchEthType(Ethernet.TYPE_ARP)
+                .build();
+
+        DeviceId srcDid = deviceId(srcId);
+        DeviceId dstDid = deviceId(dstId);
+        if (deviceService.getDevice(srcDid) == null || deviceService.getDevice(dstDid) == null) {
+            throw  new Exception("The Src or Dst Device don't exists");
+        }
+
+        log.info("Set Topology Service");
+        TopologyService topologyService = AbstractShellCommand.get(TopologyService.class);
+        Topology topology = topologyService.currentTopology();
+        Set<? extends Path> paths = topologyService.getPaths(topology, srcDid, dstDid);
+        // Path path = paths.stream().findFirst().get();
+        if (paths == null) {
+            throw  new Exception("The Src and Dst Port don't have any path");
+        }
+        Path pathUser = null;
+        for (Path path : paths) {
+            List<Link> links = path.links();
+            AtomicBoolean foundPath = new AtomicBoolean(false);
+            links.forEach(link -> {
+                log.info("This is the source port: {}", link.src().port().toString());
+                log.info("This is the destination port: {}", link.dst().port().toString());
+                if (portSrc.equals(link.src().port().toString()) &&
+                        portDst.equals(link.dst().port().toString())) {
+                    log.info("We found the path that the user want");
+                    foundPath.set(true);
+                }
+            });
+            log.info("The value of the boolean is {}", foundPath);
+            if (foundPath.get()) {
+                pathUser = path;
+                break;
+            }
+        }
+        if (pathUser == null) {
+            throw  new Exception("The Path that the user want doesn't exist");
+        }
+        log.info("The path was received correctly: {}", pathUser);
+
+        log.info("Start to create the Intent");
+        Intent intent = PathIntent.builder()
+                .appId(coreService.getAppId("org.onosproject.cli"))
+                .selector(selector)
+                .priority(400)
+                .path(pathUser)
+                .setType(setType)
+                .build();
+        log.info("Send the created Intent to apply the changes");
+        // Send the created intent
+        intentService.submit(intent);
     }
 
     /**

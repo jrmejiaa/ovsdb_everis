@@ -1,0 +1,37 @@
+{
+    "type": "object",
+    "required": [
+        "src-id",
+        "dst-id",
+        "port-src",
+        "port-dst",
+        "setType"
+    ],
+    "properties": {
+        "src-id": {
+            "type": "string",
+            "format": "str",
+            "example": "of:0000005000000202"
+        },
+        "dst-id": {
+            "type": "string",
+            "format": "str",
+            "example": "of:0000005000000102"
+        },
+        "port-src": {
+            "type": "string",
+            "format": "srt",
+            "example": "3"
+        },
+        "port-dst": {
+            "type": "string",
+            "format": "srt",
+            "example": "3"
+        },
+        "setType": {
+            "type": "string",
+            "format": "srt",
+            "example": "PRIMARY/BACKUP/FAILOVER"
+        }
+    }
+}

@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.everis.app.OvsdbBridgeService;
 import org.everis.app.OvsdbRestException;
 import org.onlab.packet.IpAddress;
+import org.onosproject.net.intent.PathIntent;
 import org.onosproject.rest.AbstractWebResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -348,6 +349,54 @@ public class AppWebResource extends AbstractWebResource {
             node.put("bridge-created:", "false");
             node.put("error:", "There was an error with the structure of the JSON");
             return Response.status(Response.Status.CONFLICT).entity(node).build();
+        }
+    }
+
+    /**
+     * Create a Path Intent for a known Path Port.
+     * @param stream JSON Configuration to make the PathIntent
+     * @onos.rsModel PathIntent
+     * @return OK 200
+     */
+    @POST
+    @Path("createPathIntent/")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response createPathIntent(InputStream stream) {
+        ObjectNode node = mapper().createObjectNode();
+        try {
+            ObjectNode jsonTree = readTreeFromStream(mapper(), stream);
+
+            String srcId = jsonTree.get("src-id").asText();
+            String dstId = jsonTree.get("dst-id").asText();
+            String portSrc = jsonTree.get("port-src").asText();
+            String portDst = jsonTree.get("port-dst").asText();
+            String setType = jsonTree.get("setType").asText();
+
+            log.info("Start the createPathIntent...");
+            OvsdbBridgeService ovsdbBridgeService = get(OvsdbBridgeService.class);
+            if (setType.equals("PRIMARY")) {
+                log.info("The path was set as PRIMARY");
+                ovsdbBridgeService.createPathIntent(srcId, dstId, portSrc, portDst,
+                        PathIntent.ProtectionType.PRIMARY);
+            } else if (setType.equals("BACKUP")) {
+                log.info("The path was set as BACKUP");
+                ovsdbBridgeService.createPathIntent(srcId, dstId, portSrc, portDst,
+                        PathIntent.ProtectionType.BACKUP);
+            } else if (setType.equals("FAILOVER")) {
+                log.info("The path was set as FAILOVER");
+                ovsdbBridgeService.createPathIntent(srcId, dstId, portSrc, portDst,
+                        PathIntent.ProtectionType.FAILOVER);
+            }
+
+            node.put("createPathIntent-created:", "true");
+            // Return 200 OK
+            return ok(node).build();
+
+        } catch (Exception ex) {
+            node.put("createPathIntent-created:", "false");
+            node.put("error:", ex.getMessage());
+            return Response.status(Response.Status.BAD_REQUEST).entity(node).build();
         }
     }
 }

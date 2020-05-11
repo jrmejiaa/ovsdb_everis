@@ -25,8 +25,8 @@
         <version>2.2.2</version>
     </parent>
 
-    <groupId>everis</groupId>
-    <artifactId>everis</artifactId>
+    <groupId>everis.ovsdb-rest</groupId>
+    <artifactId>everis.ovsdb-rest</artifactId>
     <version>1.0</version>
     <packaging>bundle</packaging>
 
@@ -34,18 +34,19 @@
     <url>http://onosproject.org</url>
 
     <properties>
-        <onos.app.name>org.everis.app</onos.app.name>
-        <web.context>/onos/org.everis</web.context>
+        <onos.app.name>everis.ovsdb-rest</onos.app.name>
+        <web.context>/onos/everis.ovsdb-rest</web.context>
         <api.version>1.0.0</api.version>
-        <api.title>EVERIS rest API </api.title>
+        <api.title>EVERIS-OVSDB</api.title>
         <onos.app.requires>
             org.onosproject.ovsdb-base,
             org.onosproject.drivers.ovsdb,
             org.onosproject.openflow-base,
-            org.onosproject.openflow
+            org.onosproject.openflow,
+            org.onosproject.fwd
         </onos.app.requires>
         <api.description>
-            EVERIS API to make control over the switches using OVSDB Protocol
+            EVERIS-OVSDB API to make control over the switches using OVSDB Protocol
         </api.description>
         <api.package>everis</api.package>
     </properties>

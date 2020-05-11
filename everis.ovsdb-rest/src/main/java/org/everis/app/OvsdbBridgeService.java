@@ -17,6 +17,7 @@
 package org.everis.app;
 
 import org.onlab.packet.IpAddress;
+import org.onosproject.net.intent.PathIntent;
 
 /**
  * APIs for ovsdb driver access.
@@ -100,4 +101,16 @@ public interface OvsdbBridgeService {
      */
     void deleteGreTunnel(IpAddress ovsdbAddress, String bridgeName, String portName)
             throws OvsdbRestException.OvsdbDeviceException;
+
+    /**
+     *
+     * @param srcId Source ID of the Device
+     * @param dstId Destination ID of the Device
+     * @param portSrc Source Port that has the path
+     * @param portDst Destination Port that has the path
+     * @param setType set the type PRIMARY or BACKUP
+     * @throws Exception Any possible error in the creation of the Intent
+     */
+    void createPathIntent(String srcId, String dstId, String portSrc, String portDst,
+                          PathIntent.ProtectionType setType) throws Exception;
 }

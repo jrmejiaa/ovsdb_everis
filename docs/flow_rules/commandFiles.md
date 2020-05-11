@@ -73,23 +73,34 @@ sudo ovs-vsctl add-port br0 vxlan1 -- set interface vxlan1 type=vxlan options:re
 
 Information using the `sudo ovs-ofctl show br-1`
 
-* ens5: 3 - 1
-* ens6: 4 - 2
-* ens4: 6 - 3
+* ens5:     1
+* ens6:     2
+* vxlan1:   3 - MPLS
+* vxlan2:   4 - Internet/LTE
+
+Host1: 00:50:79:66:68:04 id 100 172.64.0.1
+Host2: 00:50:79:66:68:0a id 200 172.64.0.3
+Host3: 00:50:79:66:68:06 id 100 172.64.0.2
+Host4: 00:50:79:66:68:07 id 200 172.64.0.4
 
 ```bash
 #New Version
 table=0,in_port=1,actions=set_field:100->tun_id,resubmit(,1)
 table=0,in_port=2,actions=set_field:200->tun_id,resubmit(,1) 
 table=0, actions=resubmit(,1)
-table=1,tun_id=100,eth_dst=00:50:79:66:68:05,actions=output:1
-table=1,tun_id=200,eth_dst=00:50:79:66:68:06,actions=output:2
-table=1,tun_id=100,eth_dst=00:50:79:66:68:03,actions=output:3
-table=1,tun_id=200,eth_dst=00:50:79:66:68:04,actions=output:3
+table=1,tun_id=100,eth_dst=00:50:79:66:68:04,actions=output:1
+table=1,tun_id=200,eth_dst=00:50:79:66:68:0a,actions=output:2
+table=1,tun_id=100,eth_dst=00:50:79:66:68:06,actions=output:3
+table=1,tun_id=200,eth_dst=00:50:79:66:68:07,actions=output:3
+table=1,tun_id=100,eth_dst=00:50:79:66:68:06,actions=output:4 #LowPriority
+table=1,tun_id=200,eth_dst=00:50:79:66:68:07,actions=output:4 #LowPriority
 table=1,tun_id=100,eth_type=0x0806,arp_tpa=172.64.0.1,actions=output:1
 table=1,tun_id=200,eth_type=0x0806,arp_tpa=172.64.0.3,actions=output:2
 table=1,tun_id=100,eth_type=0x0806,arp_tpa=172.64.0.2,actions=output:3
 table=1,tun_id=200,eth_type=0x0806,arp_tpa=172.64.0.4,actions=output:3
+table=1,tun_id=100,eth_type=0x0806,arp_tpa=172.64.0.2,actions=output:4 #LowPriority
+table=1,tun_id=200,eth_type=0x0806,arp_tpa=172.64.0.4,actions=output:4 #LowPriority
+#LowPriority
 table=1,priority=100,actions=drop
 ```
 
@@ -97,23 +108,33 @@ table=1,priority=100,actions=drop
 
 Information using the `sudo ovs-ofctl show br-1`
 
-* ens5: 3 - 1
-* ens6: 2 - 2
-* ens4: 5 - 3
+* ens5:     1
+* ens6:     2
+* vxlan1:   3
+* vxlan2:   4
+
+Host1: 00:50:79:66:68:04 id 100 172.64.0.1
+Host2: 00:50:79:66:68:0a id 200 172.64.0.3
+Host3: 00:50:79:66:68:06 id 100 172.64.0.2
+Host4: 00:50:79:66:68:07 id 200 172.64.0.4
 
 ```bash
 #New Version
 table=0,in_port=1,actions=set_field:100->tun_id,resubmit(,1)
 table=0,in_port=2,actions=set_field:200->tun_id,resubmit(,1)
 table=0, actions=resubmit(,1)
-table=1,tun_id=100,eth_dst=00:50:79:66:68:03,actions=output:1
-table=1,tun_id=200,eth_dst=00:50:79:66:68:04,actions=output:2
-table=1,tun_id=100,eth_dst=00:50:79:66:68:05,actions=output:3
-table=1,tun_id=200,eth_dst=00:50:79:66:68:06,actions=output:3
+table=1,tun_id=100,eth_dst=00:50:79:66:68:06,actions=output:1
+table=1,tun_id=200,eth_dst=00:50:79:66:68:07,actions=output:2
+table=1,tun_id=100,eth_dst=00:50:79:66:68:04,actions=output:3
+table=1,tun_id=200,eth_dst=00:50:79:66:68:0a,actions=output:3
+table=1,tun_id=100,eth_dst=00:50:79:66:68:04,actions=output:4 #LowPriority
+table=1,tun_id=200,eth_dst=00:50:79:66:68:0a,actions=output:4 #LowPriority
 table=1,tun_id=100,eth_type=0x0806,arp_tpa=172.64.0.2,actions=output:1
 table=1,tun_id=200,eth_type=0x0806,arp_tpa=172.64.0.4,actions=output:2
 table=1,tun_id=100,eth_type=0x0806,arp_tpa=172.64.0.1,actions=output:3
 table=1,tun_id=200,eth_type=0x0806,arp_tpa=172.64.0.3,actions=output:3
+table=1,tun_id=100,eth_type=0x0806,arp_tpa=172.64.0.1,actions=output:4 #LowPriority
+table=1,tun_id=200,eth_type=0x0806,arp_tpa=172.64.0.3,actions=output:4 #LowPriority
 table=1,priority=100,actions=drop
 ```
 
